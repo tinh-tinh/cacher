@@ -1,30 +1,17 @@
 package cacher
 
 import (
-	"time"
-
-	"github.com/eko/gocache/lib/v4/store"
-	gocache_store "github.com/eko/gocache/store/go_cache/v4"
-	gocache "github.com/patrickmn/go-cache"
+	"github.com/tinh-tinh/tinhtinh/common/memory"
 	"github.com/tinh-tinh/tinhtinh/core"
 )
 
 const CACHE_MANAGER core.Provide = "cache_manager"
 
-func DefaultStore() store.StoreInterface {
-	gocacheClient := gocache.New(5*time.Minute, 10*time.Minute)
-	gocacheStore := gocache_store.NewGoCache(gocacheClient)
-	return gocacheStore
-}
-
-func Register[M any](opt ...store.StoreInterface) core.Module {
+func Register[M any](opt memory.Options) core.Module {
 	return func(module *core.DynamicModule) *core.DynamicModule {
 		cacheModule := module.New(core.NewModuleOptions{})
 
-		if len(opt) == 0 {
-			opt = append(opt, DefaultStore())
-		}
-		cacheManager := New[M](opt[0])
+		cacheManager := New[M](opt)
 		cacheModule.NewProvider(core.ProviderOptions{
 			Name:  CACHE_MANAGER,
 			Value: cacheManager,
