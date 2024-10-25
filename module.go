@@ -1,22 +1,20 @@
 package cacher
 
 import (
-	"context"
 	"time"
 
-	"github.com/allegro/bigcache/v3"
-	"github.com/eko/gocache/lib/v4/cache"
 	"github.com/eko/gocache/lib/v4/store"
-	bigcache_store "github.com/eko/gocache/store/bigcache/v4"
+	gocache_store "github.com/eko/gocache/store/go_cache/v4"
+	gocache "github.com/patrickmn/go-cache"
 	"github.com/tinh-tinh/tinhtinh/core"
 )
 
 const CACHE_MANAGER core.Provide = "cache_manager"
 
 func DefaultStore() store.StoreInterface {
-	bigcacheClient, _ := bigcache.New(context.Background(), bigcache.DefaultConfig(15*time.Minute))
-	bigcacheStore := bigcache_store.NewBigcache(bigcacheClient)
-	return bigcacheStore
+	gocacheClient := gocache.New(5*time.Minute, 10*time.Minute)
+	gocacheStore := gocache_store.NewGoCache(gocacheClient)
+	return gocacheStore
 }
 
 func Register[M any](opt ...store.StoreInterface) core.Module {
@@ -26,7 +24,7 @@ func Register[M any](opt ...store.StoreInterface) core.Module {
 		if len(opt) == 0 {
 			opt = append(opt, DefaultStore())
 		}
-		cacheManager := cache.New[M](opt[0])
+		cacheManager := New[M](opt[0])
 		cacheModule.NewProvider(core.ProviderOptions{
 			Name:  CACHE_MANAGER,
 			Value: cacheManager,
@@ -36,8 +34,8 @@ func Register[M any](opt ...store.StoreInterface) core.Module {
 	}
 }
 
-func Inject[M any](module *core.DynamicModule) *cache.Cache[M] {
-	cache, ok := module.Ref(CACHE_MANAGER).(*cache.Cache[M])
+func Inject[M any](module *core.DynamicModule) *Cacher[M] {
+	cache, ok := module.Ref(CACHE_MANAGER).(*Cacher[M])
 	if !ok {
 		return nil
 	}
