@@ -1,15 +1,14 @@
 package cacher
 
 import (
-	"context"
 	"encoding/json"
 	"io"
 	"net/http/httptest"
 	"testing"
 	"time"
 
-	"github.com/allegro/bigcache/v3"
-	bigcache_store "github.com/eko/gocache/store/bigcache/v4"
+	gocache_store "github.com/eko/gocache/store/go_cache/v4"
+	gocache "github.com/patrickmn/go-cache"
 	"github.com/stretchr/testify/require"
 	"github.com/tinh-tinh/tinhtinh/common"
 	"github.com/tinh-tinh/tinhtinh/core"
@@ -21,7 +20,7 @@ func Test_Module(t *testing.T) {
 		ctrl := module.NewController("users")
 
 		ctrl.Get("", func(ctx core.Ctx) error {
-			data, err := cache.Get(context.Background(), "users")
+			data, err := cache.Get("users")
 			if err != nil {
 				return common.InternalServerException(ctx.Res(), err.Error())
 			}
@@ -31,7 +30,7 @@ func Test_Module(t *testing.T) {
 		})
 
 		ctrl.Post("", func(ctx core.Ctx) error {
-			err := cache.Set(context.Background(), "users", []byte("John"))
+			err := cache.Set("users", []byte("John"))
 			if err != nil {
 				return common.InternalServerException(ctx.Res(), err.Error())
 			}
@@ -51,14 +50,13 @@ func Test_Module(t *testing.T) {
 			},
 		})
 	}
-
-	bigcacheClient, _ := bigcache.New(context.Background(), bigcache.DefaultConfig(5*time.Minute))
-	bigcacheStore := bigcache_store.NewBigcache(bigcacheClient)
+	gocacheClient := gocache.New(5*time.Minute, 10*time.Minute)
+	gocacheStore := gocache_store.NewGoCache(gocacheClient)
 
 	appModule := func() *core.DynamicModule {
 		module := core.NewModule(core.NewModuleOptions{
 			Imports: []core.Module{
-				Register[[]byte](bigcacheStore),
+				Register[[]byte](gocacheStore),
 				userModule,
 			},
 		})
@@ -99,7 +97,7 @@ func Test_DefaultModule(t *testing.T) {
 		ctrl := module.NewController("users")
 
 		ctrl.Get("", func(ctx core.Ctx) error {
-			data, err := cache.Get(context.Background(), "users")
+			data, err := cache.Get("users")
 			if err != nil {
 				return common.InternalServerException(ctx.Res(), err.Error())
 			}
@@ -109,7 +107,7 @@ func Test_DefaultModule(t *testing.T) {
 		})
 
 		ctrl.Post("", func(ctx core.Ctx) error {
-			err := cache.Set(context.Background(), "users", []byte("John"))
+			err := cache.Set("users", []byte("John"))
 			if err != nil {
 				return common.InternalServerException(ctx.Res(), err.Error())
 			}
