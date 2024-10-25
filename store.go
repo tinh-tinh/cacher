@@ -8,6 +8,7 @@ import (
 type StoreOptions struct {
 	Ttl         time.Duration
 	CompressAlg string
+	Hooks       []Hook
 }
 
 type Params[M any] struct {
