@@ -4,37 +4,38 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tinh-tinh/tinhtinh/common/memory"
 )
 
 func TestCacher(t *testing.T) {
-	cache := New[string](DefaultStore())
+	cache := New[string](memory.Options{
+		Ttl: 15 * time.Minute,
+		Max: 100,
+	})
 	require.NotNil(t, cache)
 
-	err := cache.Set("users", "John")
-	require.Nil(t, err)
+	cache.Set("users", "John")
 
 	data, err := cache.Get("users")
 	require.Nil(t, err)
 	require.Equal(t, "John", data)
 
-	err = cache.Delete("users")
-	require.Nil(t, err)
+	cache.Delete("users")
 
 	data, err = cache.Get("users")
 	require.NotNil(t, err)
 	require.Empty(t, data)
 
-	err = cache.Set("users", "John")
-	require.Nil(t, err)
+	cache.Set("users", "John")
 
 	data, err = cache.Get("users")
 	require.Nil(t, err)
 	require.Equal(t, "John", data)
 
-	err = cache.Clear()
-	require.Nil(t, err)
+	cache.Clear()
 
 	data, err = cache.Get("users")
 	require.NotNil(t, err)
@@ -42,11 +43,13 @@ func TestCacher(t *testing.T) {
 }
 
 func TestDataTypes(t *testing.T) {
-	cache := New[string](DefaultStore())
+	cache := New[string](memory.Options{
+		Ttl: 15 * time.Minute,
+		Max: 100,
+	})
 	require.NotNil(t, cache)
 
-	err := cache.Set("users", "John")
-	require.Nil(t, err)
+	cache.Set("users", "John")
 
 	data, err := cache.Get("users")
 	require.Nil(t, err)
@@ -54,7 +57,10 @@ func TestDataTypes(t *testing.T) {
 }
 
 func Test_Context(t *testing.T) {
-	cache := New[string](DefaultStore())
+	cache := New[string](memory.Options{
+		Ttl: 15 * time.Minute,
+		Max: 100,
+	})
 	require.NotNil(t, cache)
 
 	cache.SetCtx(context.TODO())

@@ -2,19 +2,20 @@ package cacher
 
 import (
 	"context"
+	"errors"
+	"time"
 
-	"github.com/eko/gocache/lib/v4/cache"
-	"github.com/eko/gocache/lib/v4/store"
+	"github.com/tinh-tinh/tinhtinh/common/memory"
 )
 
 type Cacher[M any] struct {
-	Store *cache.Cache[M]
+	Store memory.Store
 	ctx   context.Context
 }
 
-func New[M any](store store.StoreInterface) *Cacher[M] {
+func New[M any](opt memory.Options) *Cacher[M] {
 	return &Cacher[M]{
-		Store: cache.New[M](store),
+		Store: *memory.New(opt),
 		ctx:   context.Background(),
 	}
 }
@@ -28,17 +29,21 @@ func (c *Cacher[M]) GetCtx() context.Context {
 }
 
 func (c *Cacher[M]) Get(key string) (M, error) {
-	return c.Store.Get(c.ctx, key)
+	data, ok := c.Store.Get(key).(M)
+	if !ok {
+		return *new(M), errors.New("key not found")
+	}
+	return data, nil
 }
 
-func (c *Cacher[M]) Set(key string, value M, options ...store.Option) error {
-	return c.Store.Set(c.ctx, key, value, options...)
+func (c *Cacher[M]) Set(key string, value M, ttl ...time.Duration) {
+	c.Store.Set(key, value, ttl...)
 }
 
-func (c *Cacher[M]) Delete(key string) error {
-	return c.Store.Delete(c.ctx, key)
+func (c *Cacher[M]) Delete(key string) {
+	c.Store.Delete(key)
 }
 
-func (c *Cacher[M]) Clear() error {
-	return c.Store.Clear(c.ctx)
+func (c *Cacher[M]) Clear() {
+	c.Store.Clear()
 }
