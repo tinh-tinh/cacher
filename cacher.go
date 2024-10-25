@@ -2,21 +2,19 @@ package cacher
 
 import (
 	"context"
-	"errors"
-	"time"
-
-	"github.com/tinh-tinh/tinhtinh/common/memory"
 )
 
 type Cacher[M any] struct {
-	Store memory.Store
-	ctx   context.Context
+	Store       Store[M]
+	ctx         context.Context
+	CompressAlg string
 }
 
-func New[M any](opt memory.Options) *Cacher[M] {
+func New[M any](opt StoreOptions) *Cacher[M] {
 	return &Cacher[M]{
-		Store: *memory.New(opt),
-		ctx:   context.Background(),
+		Store:       NewInMemory[M](opt),
+		ctx:         context.Background(),
+		CompressAlg: opt.CompressAlg,
 	}
 }
 
@@ -29,21 +27,17 @@ func (c *Cacher[M]) GetCtx() context.Context {
 }
 
 func (c *Cacher[M]) Get(key string) (M, error) {
-	data, ok := c.Store.Get(key).(M)
-	if !ok {
-		return *new(M), errors.New("key not found")
-	}
-	return data, nil
+	return c.Store.Get(c.ctx, key)
 }
 
-func (c *Cacher[M]) Set(key string, value M, ttl ...time.Duration) {
-	c.Store.Set(key, value, ttl...)
+func (c *Cacher[M]) Set(key string, value M, opts ...StoreOptions) error {
+	return c.Store.Set(c.ctx, key, value, opts...)
 }
 
-func (c *Cacher[M]) Delete(key string) {
-	c.Store.Delete(key)
+func (c *Cacher[M]) Delete(key string) error {
+	return c.Store.Delete(c.ctx, key)
 }
 
-func (c *Cacher[M]) Clear() {
-	c.Store.Clear()
+func (c *Cacher[M]) Clear() error {
+	return c.Store.Clear(c.ctx)
 }
