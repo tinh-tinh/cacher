@@ -7,7 +7,7 @@ require (
 	github.com/eko/gocache/lib/v4 v4.1.6
 	github.com/eko/gocache/store/bigcache/v4 v4.2.2
 	github.com/stretchr/testify v1.9.0
-	github.com/tinh-tinh/tinhtinh v1.2.0
+	github.com/tinh-tinh/tinhtinh v1.2.1
 )
 
 require (

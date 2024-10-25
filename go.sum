@@ -208,6 +208,8 @@ github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsT
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/tinh-tinh/tinhtinh v1.2.0 h1:4gXSZ5zVT7ZgYkHr51i2b/KPySr/KcvY9Tkl7PXXB4I=
 github.com/tinh-tinh/tinhtinh v1.2.0/go.mod h1:vGHoXUhXlDCij37ygQIwhkhIZ/nz8s+sjlsxb8gI4vQ=
+github.com/tinh-tinh/tinhtinh v1.2.1 h1:BiOpGThojRiJ5T8+QckqUr+PoqLfYw4mgsgaR6aCDb0=
+github.com/tinh-tinh/tinhtinh v1.2.1/go.mod h1:Ml1twSfPhVCckxSVPfZxiyLfPs2AM3aQqp4qlGoubrk=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.32/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
