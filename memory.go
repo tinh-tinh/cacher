@@ -3,6 +3,7 @@ package cacher
 import (
 	"context"
 	"errors"
+	"slices"
 	"sync"
 	"time"
 
@@ -17,6 +18,7 @@ func NewInMemory[M any](opt StoreOptions) Store[M] {
 		ttl:         opt.Ttl,
 		data:        make(map[string]item),
 		CompressAlg: opt.CompressAlg,
+		hooks:       opt.Hooks,
 	}
 	utils.StartTimeStampUpdater()
 	go memory.gc(1 * time.Second)
@@ -33,9 +35,17 @@ type Memory[M any] struct {
 	ttl         time.Duration
 	data        map[string]item
 	CompressAlg string
+	hooks       []Hook
 }
 
 func (m *Memory[M]) Set(ctx context.Context, key string, val M, opts ...StoreOptions) error {
+	findHook := slices.IndexFunc(m.hooks, func(h Hook) bool {
+		return h.Key == BeforeSet
+	})
+	if findHook != -1 {
+		m.hooks[findHook].Fnc(key, val)
+	}
+	// Handler
 	var exp uint32
 	if len(opts) > 0 {
 		exp = uint32(opts[0].Ttl.Seconds()) + utils.Timestamp()
@@ -53,6 +63,13 @@ func (m *Memory[M]) Set(ctx context.Context, key string, val M, opts ...StoreOpt
 	m.Lock()
 	m.data[key] = i
 	m.Unlock()
+
+	findHook = slices.IndexFunc(m.hooks, func(h Hook) bool {
+		return h.Key == AfterSet
+	})
+	if findHook != -1 {
+		m.hooks[findHook].Fnc(key, val)
+	}
 	return nil
 }
 
@@ -85,6 +102,14 @@ func (m *Memory[M]) MSet(ctx context.Context, data ...Params[M]) error {
 }
 
 func (m *Memory[M]) Get(ctx context.Context, key string) (M, error) {
+	findHook := slices.IndexFunc(m.hooks, func(h Hook) bool {
+		return h.Key == BeforeGet
+	})
+	if findHook != -1 {
+		m.hooks[findHook].Fnc(key, nil)
+	}
+
+	// Handler
 	m.RLock()
 	v, ok := m.data[key]
 	m.RUnlock()
@@ -97,6 +122,13 @@ func (m *Memory[M]) Get(ctx context.Context, key string) (M, error) {
 			return m.decompress(v.v)
 		}
 		return *new(M), errors.New("key not found")
+	}
+
+	findHook = slices.IndexFunc(m.hooks, func(h Hook) bool {
+		return h.Key == AfterGet
+	})
+	if findHook != -1 {
+		m.hooks[findHook].Fnc(key, val)
 	}
 	return val, nil
 }
@@ -140,9 +172,24 @@ func (m *Memory[M]) MGet(ctx context.Context, keys ...string) ([]M, error) {
 }
 
 func (m *Memory[M]) Delete(ctx context.Context, key string) error {
+	findHook := slices.IndexFunc(m.hooks, func(h Hook) bool {
+		return h.Key == BeforeDelete
+	})
+	if findHook != -1 {
+		m.hooks[findHook].Fnc(key, nil)
+	}
+
+	// Handler
 	m.Lock()
 	delete(m.data, key)
 	m.Unlock()
+
+	findHook = slices.IndexFunc(m.hooks, func(h Hook) bool {
+		return h.Key == AfterDelete
+	})
+	if findHook != -1 {
+		m.hooks[findHook].Fnc(key, nil)
+	}
 	return nil
 }
 
