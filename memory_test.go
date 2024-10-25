@@ -103,3 +103,53 @@ func Test_Fail(t *testing.T) {
 	})
 	require.Nil(t, cache2.Store)
 }
+
+func Test_MGet(t *testing.T) {
+	cache := New[string](StoreOptions{
+		Ttl: 15 * time.Minute,
+	})
+	require.NotNil(t, cache)
+
+	err := cache.MSet(Params[string]{
+		Key: "1",
+		Val: "John",
+	}, Params[string]{
+		Key: "2",
+		Val: "Jane",
+	})
+	require.Nil(t, err)
+
+	data, err := cache.MGet("1", "2")
+	require.Nil(t, err)
+	require.Equal(t, "John", data[0])
+	require.Equal(t, "Jane", data[1])
+
+	cache2 := New[string](StoreOptions{
+		Ttl: 15 * time.Minute,
+	})
+
+	_, err = cache2.MGet("1", "2")
+	require.NotNil(t, err)
+
+	cache3 := New[string](StoreOptions{
+		Ttl:         15 * time.Minute,
+		CompressAlg: "zlib",
+	})
+
+	err = cache3.MSet(Params[string]{
+		Key: "1",
+		Val: "John",
+		Options: StoreOptions{
+			Ttl: 5 * time.Minute,
+		},
+	}, Params[string]{
+		Key: "2",
+		Val: "Jane",
+	})
+	require.Nil(t, err)
+
+	data, err = cache3.MGet("1", "2")
+	require.Nil(t, err)
+	require.Equal(t, "John", data[0])
+	require.Equal(t, "Jane", data[1])
+}

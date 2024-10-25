@@ -30,8 +30,16 @@ func (c *Cacher[M]) Get(key string) (M, error) {
 	return c.Store.Get(c.ctx, key)
 }
 
+func (c *Cacher[M]) MGet(keys ...string) ([]M, error) {
+	return c.Store.MGet(c.ctx, keys...)
+}
+
 func (c *Cacher[M]) Set(key string, value M, opts ...StoreOptions) error {
 	return c.Store.Set(c.ctx, key, value, opts...)
+}
+
+func (c *Cacher[M]) MSet(data ...Params[M]) error {
+	return c.Store.MSet(c.ctx, data...)
 }
 
 func (c *Cacher[M]) Delete(key string) error {

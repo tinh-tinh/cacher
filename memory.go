@@ -56,6 +56,34 @@ func (m *Memory[M]) Set(ctx context.Context, key string, val M, opts ...StoreOpt
 	return nil
 }
 
+func (m *Memory[M]) MSet(ctx context.Context, data ...Params[M]) error {
+	save := make(map[string]item)
+	for _, d := range data {
+		var exp uint32
+		if d.Options.Ttl > 0 {
+			exp = uint32(d.Options.Ttl.Seconds()) + utils.Timestamp()
+		} else {
+			exp = uint32(m.ttl.Seconds()) + utils.Timestamp()
+		}
+		i := item{e: exp, v: d.Val}
+		if m.CompressAlg != "" {
+			b, err := m.compress(d.Val)
+			if err != nil {
+				return err
+			}
+			i.v = b
+		}
+		save[d.Key] = i
+	}
+
+	m.Lock()
+	for k, v := range save {
+		m.data[k] = v
+	}
+	m.Unlock()
+	return nil
+}
+
 func (m *Memory[M]) Get(ctx context.Context, key string) (M, error) {
 	m.RLock()
 	v, ok := m.data[key]
@@ -71,6 +99,44 @@ func (m *Memory[M]) Get(ctx context.Context, key string) (M, error) {
 		return *new(M), errors.New("key not found")
 	}
 	return val, nil
+}
+
+func (m *Memory[M]) MGet(ctx context.Context, keys ...string) ([]M, error) {
+	var output []item
+	m.RLock()
+	for _, key := range keys {
+		val, ok := m.data[key]
+		if ok {
+			output = append(output, val)
+		}
+	}
+	m.RUnlock()
+
+	if len(output) == 0 {
+		return nil, errors.New("key not found")
+	}
+
+	var data []M
+	for _, v := range output {
+		if v.e != 0 && v.e <= utils.Timestamp() {
+			continue
+		}
+		val, ok := v.v.(M)
+		if !ok {
+			if m.CompressAlg != "" {
+				d, err := m.decompress(v.v)
+				if err != nil {
+					continue
+				}
+				val = d
+			} else {
+				continue
+			}
+		}
+		data = append(data, val)
+	}
+
+	return data, nil
 }
 
 func (m *Memory[M]) Delete(ctx context.Context, key string) error {
