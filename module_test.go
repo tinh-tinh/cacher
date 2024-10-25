@@ -9,7 +9,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/tinh-tinh/tinhtinh/common"
-	"github.com/tinh-tinh/tinhtinh/common/memory"
 	"github.com/tinh-tinh/tinhtinh/core"
 )
 
@@ -50,9 +49,8 @@ func Test_Module(t *testing.T) {
 	appModule := func() *core.DynamicModule {
 		module := core.NewModule(core.NewModuleOptions{
 			Imports: []core.Module{
-				Register[[]byte](memory.Options{
+				Register[[]byte](StoreOptions{
 					Ttl: 15 * time.Minute,
-					Max: 100,
 				}),
 				userModule,
 			},

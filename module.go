@@ -1,13 +1,12 @@
 package cacher
 
 import (
-	"github.com/tinh-tinh/tinhtinh/common/memory"
 	"github.com/tinh-tinh/tinhtinh/core"
 )
 
 const CACHE_MANAGER core.Provide = "cache_manager"
 
-func Register[M any](opt memory.Options) core.Module {
+func Register[M any](opt StoreOptions) core.Module {
 	return func(module *core.DynamicModule) *core.DynamicModule {
 		cacheModule := module.New(core.NewModuleOptions{})
 
