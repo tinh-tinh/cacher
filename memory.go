@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tinh-tinh/tinhtinh/utils"
+	"github.com/tinh-tinh/tinhtinh/common/era"
 )
 
 func NewInMemory[M any](opt StoreOptions) Store[M] {
@@ -20,7 +20,7 @@ func NewInMemory[M any](opt StoreOptions) Store[M] {
 		CompressAlg: opt.CompressAlg,
 		hooks:       opt.Hooks,
 	}
-	utils.StartTimeStampUpdater()
+	era.StartTimeStampUpdater()
 	go memory.gc(1 * time.Second)
 	return memory
 }
@@ -48,9 +48,9 @@ func (m *Memory[M]) Set(ctx context.Context, key string, val M, opts ...StoreOpt
 	// Handler
 	var exp uint32
 	if len(opts) > 0 {
-		exp = uint32(opts[0].Ttl.Seconds()) + utils.Timestamp()
+		exp = uint32(opts[0].Ttl.Seconds()) + era.Timestamp()
 	} else {
-		exp = uint32(m.ttl.Seconds()) + utils.Timestamp()
+		exp = uint32(m.ttl.Seconds()) + era.Timestamp()
 	}
 	i := item{e: exp, v: val}
 	if m.CompressAlg != "" {
@@ -78,9 +78,9 @@ func (m *Memory[M]) MSet(ctx context.Context, data ...Params[M]) error {
 	for _, d := range data {
 		var exp uint32
 		if d.Options.Ttl > 0 {
-			exp = uint32(d.Options.Ttl.Seconds()) + utils.Timestamp()
+			exp = uint32(d.Options.Ttl.Seconds()) + era.Timestamp()
 		} else {
-			exp = uint32(m.ttl.Seconds()) + utils.Timestamp()
+			exp = uint32(m.ttl.Seconds()) + era.Timestamp()
 		}
 		i := item{e: exp, v: d.Val}
 		if m.CompressAlg != "" {
@@ -113,7 +113,7 @@ func (m *Memory[M]) Get(ctx context.Context, key string) (M, error) {
 	m.RLock()
 	v, ok := m.data[key]
 	m.RUnlock()
-	if !ok || v.e != 0 && v.e <= utils.Timestamp() {
+	if !ok || v.e != 0 && v.e <= era.Timestamp() {
 		return *new(M), errors.New("key not found")
 	}
 	val, ok := v.v.(M)
@@ -150,7 +150,7 @@ func (m *Memory[M]) MGet(ctx context.Context, keys ...string) ([]M, error) {
 
 	var data []M
 	for _, v := range output {
-		if v.e != 0 && v.e <= utils.Timestamp() {
+		if v.e != 0 && v.e <= era.Timestamp() {
 			continue
 		}
 		val, ok := v.v.(M)
@@ -206,7 +206,7 @@ func (m *Memory[M]) gc(sleep time.Duration) {
 	defer ticker.Stop()
 	var expired []string
 	for range ticker.C {
-		ts := utils.Timestamp()
+		ts := era.Timestamp()
 		expired = expired[:0]
 		m.RLock()
 		for key, v := range m.data {
