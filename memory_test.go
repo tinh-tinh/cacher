@@ -27,7 +27,7 @@ func Test_CompressGzip(t *testing.T) {
 		Age  string
 	}
 	cache := cacher.New[Person](cacher.StoreOptions{
-		CompressAlg: "gzip",
+		CompressAlg: cacher.CompressAlgGzip,
 		Ttl:         15 * time.Minute,
 	})
 
