@@ -4,7 +4,7 @@ go 1.22.2
 
 require (
 	github.com/stretchr/testify v1.9.0
-	github.com/tinh-tinh/tinhtinh v1.2.4
+	github.com/tinh-tinh/tinhtinh v1.4.0
 )
 
 require (
