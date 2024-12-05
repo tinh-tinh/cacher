@@ -7,7 +7,7 @@ import (
 type Cacher[M any] struct {
 	Store       Store[M]
 	ctx         context.Context
-	CompressAlg string
+	CompressAlg CompressAlg
 }
 
 func New[M any](opt StoreOptions) *Cacher[M] {

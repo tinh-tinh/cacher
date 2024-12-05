@@ -7,7 +7,7 @@ import (
 
 type StoreOptions struct {
 	Ttl         time.Duration
-	CompressAlg string
+	CompressAlg CompressAlg
 	Hooks       []Hook
 }
 

@@ -5,34 +5,19 @@ import (
 	"compress/flate"
 	"compress/gzip"
 	"compress/zlib"
-	"encoding/gob"
 	"io"
 )
 
-func toBytes(data interface{}) ([]byte, error) {
-	var buf bytes.Buffer
-	enc := gob.NewEncoder(&buf)
-	if err := enc.Encode(data); err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
-}
+type CompressAlg string
 
-func fromBytes[M any](data []byte) (interface{}, error) {
-	buf := bytes.NewBuffer(data)
-	dec := gob.NewDecoder(buf)
+const (
+	CompressAlgGzip  CompressAlg = "gzip"
+	CompressAlgFlate CompressAlg = "flate"
+	CompressAlgZlib  CompressAlg = "zlib"
+)
 
-	var m M
-	for {
-		err := dec.Decode(&m)
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return nil, err
-		}
-	}
-	return m, nil
+func IsValidAlg(val CompressAlg) bool {
+	return val == CompressAlgGzip || val == CompressAlgFlate || val == CompressAlgZlib
 }
 
 // Gzip

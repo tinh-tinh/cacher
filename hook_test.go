@@ -1,4 +1,4 @@
-package cacher
+package cacher_test
 
 import (
 	"fmt"
@@ -6,29 +6,30 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tinh-tinh/cacher"
 )
 
 func Test_Hook(t *testing.T) {
-	cache := New[string](StoreOptions{
+	cache := cacher.New[string](cacher.StoreOptions{
 		Ttl: 15 * time.Minute,
-		Hooks: []Hook{
-			{Key: BeforeSet, Fnc: func(key string, val any) {
+		Hooks: []cacher.Hook{
+			{Key: cacher.BeforeSet, Fnc: func(key string, val any) {
 				fmt.Println("BeforeSet", key, val)
 			}},
-			{Key: AfterSet, Fnc: func(key string, val any) {
+			{Key: cacher.AfterSet, Fnc: func(key string, val any) {
 				fmt.Println("AfterSet", key, val)
 			}},
-			{Key: BeforeGet, Fnc: func(key string, val any) {
-				fmt.Println("BeforeGet", key, val)
+			{Key: cacher.BeforeGet, Fnc: func(key string, val any) {
+				fmt.Println("BeforeGet", key)
 			}},
-			{Key: AfterGet, Fnc: func(key string, val any) {
+			{Key: cacher.AfterGet, Fnc: func(key string, val any) {
 				fmt.Println("AfterGet", key, val)
 			}},
-			{Key: BeforeDelete, Fnc: func(key string, val any) {
-				fmt.Println("BeforeDelete", key, val)
+			{Key: cacher.BeforeDelete, Fnc: func(key string, val any) {
+				fmt.Println("BeforeDelete", key)
 			}},
-			{Key: AfterDelete, Fnc: func(key string, val any) {
-				fmt.Println("AfterDelete", key, val)
+			{Key: cacher.AfterDelete, Fnc: func(key string, val any) {
+				fmt.Println("AfterDelete", key)
 			}},
 		},
 	})

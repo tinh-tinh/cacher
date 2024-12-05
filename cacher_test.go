@@ -1,4 +1,4 @@
-package cacher
+package cacher_test
 
 import (
 	"context"
@@ -6,10 +6,11 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tinh-tinh/cacher"
 )
 
 func TestCacher(t *testing.T) {
-	cache := New[string](StoreOptions{
+	cache := cacher.New[string](cacher.StoreOptions{
 		Ttl: 15 * time.Minute,
 	})
 	require.NotNil(t, cache)
@@ -28,7 +29,7 @@ func TestCacher(t *testing.T) {
 	require.NotNil(t, err)
 	require.Empty(t, data)
 
-	err = cache.Set("users", "John", StoreOptions{Ttl: 5 * time.Minute})
+	err = cache.Set("users", "John", cacher.StoreOptions{Ttl: 5 * time.Minute})
 	require.Nil(t, err)
 
 	data, err = cache.Get("users")
@@ -44,7 +45,7 @@ func TestCacher(t *testing.T) {
 }
 
 func TestDataTypes(t *testing.T) {
-	cache := New[string](StoreOptions{
+	cache := cacher.New[string](cacher.StoreOptions{
 		Ttl: 15 * time.Minute,
 	})
 	require.NotNil(t, cache)
@@ -57,7 +58,7 @@ func TestDataTypes(t *testing.T) {
 }
 
 func Test_Context(t *testing.T) {
-	cache := New[string](StoreOptions{
+	cache := cacher.New[string](cacher.StoreOptions{
 		Ttl: 15 * time.Minute,
 	})
 	require.NotNil(t, cache)

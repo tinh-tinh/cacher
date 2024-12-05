@@ -11,7 +11,7 @@ import (
 )
 
 func NewInMemory[M any](opt StoreOptions) Store[M] {
-	if opt.CompressAlg != "" && opt.CompressAlg != "zlib" && opt.CompressAlg != "flate" && opt.CompressAlg != "gzip" {
+	if opt.CompressAlg != "" && !IsValidAlg(opt.CompressAlg) {
 		return nil
 	}
 	memory := &Memory[M]{
@@ -34,7 +34,7 @@ type Memory[M any] struct {
 	sync.RWMutex
 	ttl         time.Duration
 	data        map[string]item
-	CompressAlg string
+	CompressAlg CompressAlg
 	hooks       []Hook
 }
 
@@ -227,7 +227,7 @@ func (m *Memory[M]) gc(sleep time.Duration) {
 }
 
 func (m *Memory[M]) compress(data M) ([]byte, error) {
-	input, err := toBytes(data)
+	input, err := ToBytes(data)
 	if err != nil {
 		return nil, err
 	}
@@ -272,7 +272,7 @@ func (m *Memory[M]) decompress(dataRaw interface{}) (M, error) {
 		return *new(M), nil
 	}
 
-	dataRaw, err = fromBytes[M](output)
+	dataRaw, err = FromBytes[M](output)
 	if err != nil {
 		return *new(M), err
 	}

@@ -1,4 +1,4 @@
-package cacher
+package cacher_test
 
 import (
 	"encoding/json"
@@ -8,13 +8,14 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tinh-tinh/cacher"
 	"github.com/tinh-tinh/tinhtinh/common"
 	"github.com/tinh-tinh/tinhtinh/core"
 )
 
 func Test_Module(t *testing.T) {
 	userController := func(module *core.DynamicModule) *core.DynamicController {
-		cache := Inject[[]byte](module)
+		cache := cacher.Inject[[]byte](module)
 		ctrl := module.NewController("users")
 
 		ctrl.Get("", func(ctx core.Ctx) error {
@@ -49,7 +50,7 @@ func Test_Module(t *testing.T) {
 	appModule := func() *core.DynamicModule {
 		module := core.NewModule(core.NewModuleOptions{
 			Imports: []core.Module{
-				Register[[]byte](StoreOptions{
+				cacher.Register[[]byte](cacher.StoreOptions{
 					Ttl: 15 * time.Minute,
 				}),
 				userModule,
@@ -89,6 +90,6 @@ func Test_Module(t *testing.T) {
 func Test_Nil(t *testing.T) {
 	module := core.NewModule(core.NewModuleOptions{})
 
-	cache := Inject[[]byte](module)
+	cache := cacher.Inject[[]byte](module)
 	require.Nil(t, cache)
 }

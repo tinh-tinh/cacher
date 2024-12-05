@@ -1,14 +1,15 @@
-package cacher
+package cacher_test
 
 import (
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tinh-tinh/cacher"
 )
 
 func Test_Expire(t *testing.T) {
-	cache := New[any](StoreOptions{
+	cache := cacher.New[any](cacher.StoreOptions{
 		Ttl: 1 * time.Millisecond,
 	})
 
@@ -25,7 +26,7 @@ func Test_CompressGzip(t *testing.T) {
 		Name string
 		Age  string
 	}
-	cache := New[Person](StoreOptions{
+	cache := cacher.New[Person](cacher.StoreOptions{
 		CompressAlg: "gzip",
 		Ttl:         15 * time.Minute,
 	})
@@ -48,7 +49,7 @@ func Test_CompressZlib(t *testing.T) {
 		Name string
 		Age  string
 	}
-	cache := New[Person](StoreOptions{
+	cache := cacher.New[Person](cacher.StoreOptions{
 		CompressAlg: "zlib",
 		Ttl:         15 * time.Minute,
 	})
@@ -71,8 +72,8 @@ func Test_CompressFlate(t *testing.T) {
 		Name string
 		Age  string
 	}
-	cache := New[Person](StoreOptions{
-		CompressAlg: "flate",
+	cache := cacher.New[Person](cacher.StoreOptions{
+		CompressAlg: cacher.CompressAlgFlate,
 		Ttl:         15 * time.Minute,
 	})
 
@@ -90,14 +91,14 @@ func Test_CompressFlate(t *testing.T) {
 }
 
 func Test_Fail(t *testing.T) {
-	cache := New[any](StoreOptions{
+	cache := cacher.New[any](cacher.StoreOptions{
 		Ttl: 15 * time.Minute,
 	})
 
 	_, err := cache.Get("users")
 	require.NotNil(t, err)
 
-	cache2 := New[string](StoreOptions{
+	cache2 := cacher.New[string](cacher.StoreOptions{
 		Ttl:         15 * time.Minute,
 		CompressAlg: "abc",
 	})
@@ -105,15 +106,15 @@ func Test_Fail(t *testing.T) {
 }
 
 func Test_MGet(t *testing.T) {
-	cache := New[string](StoreOptions{
+	cache := cacher.New[string](cacher.StoreOptions{
 		Ttl: 15 * time.Minute,
 	})
 	require.NotNil(t, cache)
 
-	err := cache.MSet(Params[string]{
+	err := cache.MSet(cacher.Params[string]{
 		Key: "1",
 		Val: "John",
-	}, Params[string]{
+	}, cacher.Params[string]{
 		Key: "2",
 		Val: "Jane",
 	})
@@ -124,25 +125,25 @@ func Test_MGet(t *testing.T) {
 	require.Equal(t, "John", data[0])
 	require.Equal(t, "Jane", data[1])
 
-	cache2 := New[string](StoreOptions{
+	cache2 := cacher.New[string](cacher.StoreOptions{
 		Ttl: 15 * time.Minute,
 	})
 
 	_, err = cache2.MGet("1", "2")
 	require.NotNil(t, err)
 
-	cache3 := New[string](StoreOptions{
+	cache3 := cacher.New[string](cacher.StoreOptions{
 		Ttl:         15 * time.Minute,
-		CompressAlg: "zlib",
+		CompressAlg: cacher.CompressAlgZlib,
 	})
 
-	err = cache3.MSet(Params[string]{
+	err = cache3.MSet(cacher.Params[string]{
 		Key: "1",
 		Val: "John",
-		Options: StoreOptions{
+		Options: cacher.StoreOptions{
 			Ttl: 5 * time.Minute,
 		},
-	}, Params[string]{
+	}, cacher.Params[string]{
 		Key: "2",
 		Val: "Jane",
 	})
