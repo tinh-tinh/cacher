@@ -18,6 +18,7 @@ type Params[M any] struct {
 }
 
 type Store[M any] interface {
+	SetOptions(option StoreOptions)
 	Get(ctx context.Context, key string) (M, error)
 	MGet(ctx context.Context, keys ...string) ([]M, error)
 	Set(ctx context.Context, key string, value M, opts ...StoreOptions) error

@@ -50,7 +50,7 @@ func Test_Module(t *testing.T) {
 	appModule := func() *core.DynamicModule {
 		module := core.NewModule(core.NewModuleOptions{
 			Imports: []core.Module{
-				cacher.Register[[]byte](cacher.StoreOptions{
+				cacher.Register(cacher.Options[[]byte]{
 					Ttl: 15 * time.Minute,
 				}),
 				userModule,

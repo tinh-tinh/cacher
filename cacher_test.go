@@ -10,7 +10,7 @@ import (
 )
 
 func TestCacher(t *testing.T) {
-	cache := cacher.New[string](cacher.StoreOptions{
+	cache := cacher.New(cacher.Options[string]{
 		Ttl: 15 * time.Minute,
 	})
 	require.NotNil(t, cache)
@@ -45,7 +45,7 @@ func TestCacher(t *testing.T) {
 }
 
 func TestDataTypes(t *testing.T) {
-	cache := cacher.New[string](cacher.StoreOptions{
+	cache := cacher.New(cacher.Options[string]{
 		Ttl: 15 * time.Minute,
 	})
 	require.NotNil(t, cache)
@@ -58,7 +58,7 @@ func TestDataTypes(t *testing.T) {
 }
 
 func Test_Context(t *testing.T) {
-	cache := cacher.New[string](cacher.StoreOptions{
+	cache := cacher.New(cacher.Options[string]{
 		Ttl: 15 * time.Minute,
 	})
 	require.NotNil(t, cache)

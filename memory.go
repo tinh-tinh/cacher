@@ -38,6 +38,20 @@ type Memory[M any] struct {
 	hooks       []Hook
 }
 
+func (m *Memory[M]) SetOptions(option StoreOptions) {
+	if option.CompressAlg != "" && IsValidAlg(option.CompressAlg) {
+		m.CompressAlg = option.CompressAlg
+	}
+
+	if option.Ttl > 0 {
+		m.ttl = option.Ttl
+	}
+
+	if option.Hooks != nil {
+		m.hooks = option.Hooks
+	}
+}
+
 func (m *Memory[M]) Set(ctx context.Context, key string, val M, opts ...StoreOptions) error {
 	findHook := slices.IndexFunc(m.hooks, func(h Hook) bool {
 		return h.Key == BeforeSet

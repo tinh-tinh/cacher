@@ -10,7 +10,7 @@ import (
 )
 
 func Test_Hook(t *testing.T) {
-	cache := cacher.New[string](cacher.StoreOptions{
+	cache := cacher.New(cacher.Options[string]{
 		Ttl: 15 * time.Minute,
 		Hooks: []cacher.Hook{
 			{Key: cacher.BeforeSet, Fnc: func(key string, val any) {

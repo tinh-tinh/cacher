@@ -9,7 +9,7 @@ import (
 )
 
 func Test_Expire(t *testing.T) {
-	cache := cacher.New[any](cacher.StoreOptions{
+	cache := cacher.New(cacher.Options[any]{
 		Ttl: 1 * time.Millisecond,
 	})
 
@@ -26,7 +26,7 @@ func Test_CompressGzip(t *testing.T) {
 		Name string
 		Age  string
 	}
-	cache := cacher.New[Person](cacher.StoreOptions{
+	cache := cacher.New(cacher.Options[Person]{
 		CompressAlg: cacher.CompressAlgGzip,
 		Ttl:         15 * time.Minute,
 	})
@@ -49,8 +49,8 @@ func Test_CompressZlib(t *testing.T) {
 		Name string
 		Age  string
 	}
-	cache := cacher.New[Person](cacher.StoreOptions{
-		CompressAlg: "zlib",
+	cache := cacher.New(cacher.Options[Person]{
+		CompressAlg: cacher.CompressAlgZlib,
 		Ttl:         15 * time.Minute,
 	})
 
@@ -72,7 +72,7 @@ func Test_CompressFlate(t *testing.T) {
 		Name string
 		Age  string
 	}
-	cache := cacher.New[Person](cacher.StoreOptions{
+	cache := cacher.New(cacher.Options[Person]{
 		CompressAlg: cacher.CompressAlgFlate,
 		Ttl:         15 * time.Minute,
 	})
@@ -91,14 +91,14 @@ func Test_CompressFlate(t *testing.T) {
 }
 
 func Test_Fail(t *testing.T) {
-	cache := cacher.New[any](cacher.StoreOptions{
+	cache := cacher.New(cacher.Options[any]{
 		Ttl: 15 * time.Minute,
 	})
 
 	_, err := cache.Get("users")
 	require.NotNil(t, err)
 
-	cache2 := cacher.New[string](cacher.StoreOptions{
+	cache2 := cacher.New(cacher.Options[string]{
 		Ttl:         15 * time.Minute,
 		CompressAlg: "abc",
 	})
@@ -106,7 +106,7 @@ func Test_Fail(t *testing.T) {
 }
 
 func Test_MGet(t *testing.T) {
-	cache := cacher.New[string](cacher.StoreOptions{
+	cache := cacher.New(cacher.Options[string]{
 		Ttl: 15 * time.Minute,
 	})
 	require.NotNil(t, cache)
@@ -125,14 +125,14 @@ func Test_MGet(t *testing.T) {
 	require.Equal(t, "John", data[0])
 	require.Equal(t, "Jane", data[1])
 
-	cache2 := cacher.New[string](cacher.StoreOptions{
+	cache2 := cacher.New(cacher.Options[string]{
 		Ttl: 15 * time.Minute,
 	})
 
 	_, err = cache2.MGet("1", "2")
 	require.NotNil(t, err)
 
-	cache3 := cacher.New[string](cacher.StoreOptions{
+	cache3 := cacher.New(cacher.Options[string]{
 		Ttl:         15 * time.Minute,
 		CompressAlg: cacher.CompressAlgZlib,
 	})

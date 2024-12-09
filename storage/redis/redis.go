@@ -223,3 +223,17 @@ func (r *Redis[M]) decompress(dataRaw interface{}) (M, error) {
 	}
 	return data, nil
 }
+
+func (r *Redis[M]) SetOptions(option cacher.StoreOptions) {
+	if option.CompressAlg != "" && cacher.IsValidAlg(option.CompressAlg) {
+		r.CompressAlg = option.CompressAlg
+	}
+
+	if option.Ttl > 0 {
+		r.ttl = option.Ttl
+	}
+
+	if option.Hooks != nil {
+		r.hooks = option.Hooks
+	}
+}
