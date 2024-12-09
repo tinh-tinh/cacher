@@ -2,6 +2,7 @@ package cacher
 
 import (
 	"context"
+	"time"
 )
 
 type Cacher[M any] struct {
@@ -10,11 +11,32 @@ type Cacher[M any] struct {
 	CompressAlg CompressAlg
 }
 
-func New[M any](opt StoreOptions) *Cacher[M] {
+type Options[M any] struct {
+	Store       Store[M]
+	Ttl         time.Duration
+	CompressAlg CompressAlg
+	Hooks       []Hook
+}
+
+func New[M any](opt Options[M]) *Cacher[M] {
+	var store Store[M]
+	if opt.Store != nil {
+		store = opt.Store
+		store.SetOptions(StoreOptions{
+			Ttl:         opt.Ttl,
+			CompressAlg: opt.CompressAlg,
+			Hooks:       opt.Hooks,
+		})
+	} else {
+		store = NewInMemory[M](StoreOptions{
+			Ttl:         opt.Ttl,
+			CompressAlg: opt.CompressAlg,
+			Hooks:       opt.Hooks,
+		})
+	}
 	return &Cacher[M]{
-		Store:       NewInMemory[M](opt),
-		ctx:         context.Background(),
-		CompressAlg: opt.CompressAlg,
+		Store: store,
+		ctx:   context.Background(),
 	}
 }
 

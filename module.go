@@ -6,11 +6,11 @@ import (
 
 const CACHE_MANAGER core.Provide = "cache_manager"
 
-func Register[M any](opt StoreOptions) core.Module {
+func Register[M any](options ...Options[M]) core.Module {
 	return func(module *core.DynamicModule) *core.DynamicModule {
 		cacheModule := module.New(core.NewModuleOptions{})
 
-		cacheManager := New[M](opt)
+		cacheManager := New(options[0])
 		cacheModule.NewProvider(core.ProviderOptions{
 			Name:  CACHE_MANAGER,
 			Value: cacheManager,
