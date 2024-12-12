@@ -5,6 +5,7 @@ import (
 	"compress/flate"
 	"compress/gzip"
 	"compress/zlib"
+	"errors"
 	"io"
 )
 
@@ -100,4 +101,62 @@ func DecompressFlate(data []byte) ([]byte, error) {
 		return nil, err
 	}
 	return decompressed.Bytes(), nil
+}
+
+func Compress[M any](data M, alg CompressAlg) ([]byte, error) {
+	input, err := ToBytes(data)
+	if err != nil {
+		return nil, err
+	}
+	switch alg {
+	case CompressAlgGzip:
+		return CompressGzip(input)
+	case CompressAlgFlate:
+		return CompressFlate(input)
+	case CompressAlgZlib:
+		return CompressZlib(input)
+	default:
+		return input, nil
+	}
+}
+
+func Decompress[M any](input interface{}, alg CompressAlg) (M, error) {
+	dataByte, ok := input.([]byte)
+	if !ok {
+		return *new(M), errors.New("assert type failed")
+	}
+
+	var output []byte
+	var err error
+
+	switch alg {
+	case CompressAlgGzip:
+		output, err = DecompressGzip(dataByte)
+		if err != nil {
+			return *new(M), err
+		}
+	case CompressAlgFlate:
+		output, err = DecompressFlate(dataByte)
+		if err != nil {
+			return *new(M), err
+		}
+	case CompressAlgZlib:
+		output, err = DecompressZlib(dataByte)
+		if err != nil {
+			return *new(M), err
+		}
+	default:
+		return *new(M), err
+	}
+
+	dataRaw, err := FromBytes[M](output)
+	if err != nil {
+		return *new(M), err
+	}
+
+	data, ok := dataRaw.(M)
+	if !ok {
+		return *new(M), errors.New("assert type failed")
+	}
+	return data, nil
 }

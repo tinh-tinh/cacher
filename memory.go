@@ -3,7 +3,6 @@ package cacher
 import (
 	"context"
 	"errors"
-	"slices"
 	"sync"
 	"time"
 
@@ -53,12 +52,7 @@ func (m *Memory[M]) SetOptions(option StoreOptions) {
 }
 
 func (m *Memory[M]) Set(ctx context.Context, key string, val M, opts ...StoreOptions) error {
-	findHook := slices.IndexFunc(m.hooks, func(h Hook) bool {
-		return h.Key == BeforeSet
-	})
-	if findHook != -1 {
-		m.hooks[findHook].Fnc(key, val)
-	}
+	HandlerBeforeSet(m, key, val)
 	// Handler
 	var exp uint32
 	if len(opts) > 0 {
@@ -78,12 +72,7 @@ func (m *Memory[M]) Set(ctx context.Context, key string, val M, opts ...StoreOpt
 	m.data[key] = i
 	m.Unlock()
 
-	findHook = slices.IndexFunc(m.hooks, func(h Hook) bool {
-		return h.Key == AfterSet
-	})
-	if findHook != -1 {
-		m.hooks[findHook].Fnc(key, val)
-	}
+	HandlerAfterSet(m, key, val)
 	return nil
 }
 
@@ -116,12 +105,7 @@ func (m *Memory[M]) MSet(ctx context.Context, data ...Params[M]) error {
 }
 
 func (m *Memory[M]) Get(ctx context.Context, key string) (M, error) {
-	findHook := slices.IndexFunc(m.hooks, func(h Hook) bool {
-		return h.Key == BeforeGet
-	})
-	if findHook != -1 {
-		m.hooks[findHook].Fnc(key, nil)
-	}
+	HandlerBeforeGet(m, key)
 
 	// Handler
 	m.RLock()
@@ -138,12 +122,7 @@ func (m *Memory[M]) Get(ctx context.Context, key string) (M, error) {
 		return *new(M), errors.New("key not found")
 	}
 
-	findHook = slices.IndexFunc(m.hooks, func(h Hook) bool {
-		return h.Key == AfterGet
-	})
-	if findHook != -1 {
-		m.hooks[findHook].Fnc(key, val)
-	}
+	HandlerAfterGet(m, key, val)
 	return val, nil
 }
 
@@ -186,24 +165,14 @@ func (m *Memory[M]) MGet(ctx context.Context, keys ...string) ([]M, error) {
 }
 
 func (m *Memory[M]) Delete(ctx context.Context, key string) error {
-	findHook := slices.IndexFunc(m.hooks, func(h Hook) bool {
-		return h.Key == BeforeDelete
-	})
-	if findHook != -1 {
-		m.hooks[findHook].Fnc(key, nil)
-	}
+	HandlerBeforeDelete(m, key)
 
 	// Handler
 	m.Lock()
 	delete(m.data, key)
 	m.Unlock()
 
-	findHook = slices.IndexFunc(m.hooks, func(h Hook) bool {
-		return h.Key == AfterDelete
-	})
-	if findHook != -1 {
-		m.hooks[findHook].Fnc(key, nil)
-	}
+	HandlerAfterDelete(m, key)
 	return nil
 }
 
@@ -296,4 +265,8 @@ func (m *Memory[M]) decompress(dataRaw interface{}) (M, error) {
 		return *new(M), errors.New("assert type failed")
 	}
 	return data, nil
+}
+
+func (m *Memory[M]) GetHooks() []Hook {
+	return m.hooks
 }
