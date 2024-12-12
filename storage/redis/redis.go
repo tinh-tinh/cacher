@@ -3,8 +3,6 @@ package redis
 import (
 	"context"
 	"encoding/json"
-	"errors"
-	"slices"
 	"time"
 
 	"github.com/tinh-tinh/cacher"
@@ -41,12 +39,8 @@ type Redis[M any] struct {
 }
 
 func (r *Redis[M]) Get(ctx context.Context, key string) (M, error) {
-	findHook := slices.IndexFunc(r.hooks, func(h cacher.Hook) bool {
-		return h.Key == cacher.BeforeGet
-	})
-	if findHook != -1 {
-		r.hooks[findHook].Fnc(key, nil)
-	}
+	cacher.HandlerBeforeGet(r, key)
+
 	// Handler
 	val, err := r.client.Get(ctx, key).Result()
 	if err != nil {
@@ -57,7 +51,7 @@ func (r *Redis[M]) Get(ctx context.Context, key string) (M, error) {
 	err = json.Unmarshal([]byte(val), &schema)
 	if err != nil {
 		if r.CompressAlg != "" {
-			schema, err = r.decompress([]byte(val))
+			schema, err = cacher.Decompress[M]([]byte(val), r.CompressAlg)
 			if err != nil {
 				return *new(M), err
 			}
@@ -66,13 +60,7 @@ func (r *Redis[M]) Get(ctx context.Context, key string) (M, error) {
 		}
 	}
 
-	findHook = slices.IndexFunc(r.hooks, func(h cacher.Hook) bool {
-		return h.Key == cacher.AfterGet
-	})
-	if findHook != -1 {
-		r.hooks[findHook].Fnc(key, schema)
-	}
-
+	cacher.HandlerAfterGet(r, key, schema)
 	return schema, nil
 }
 
@@ -89,12 +77,7 @@ func (r *Redis[M]) MGet(ctx context.Context, keys ...string) ([]M, error) {
 }
 
 func (r *Redis[M]) Set(ctx context.Context, key string, val M, opts ...cacher.StoreOptions) error {
-	findHook := slices.IndexFunc(r.hooks, func(h cacher.Hook) bool {
-		return h.Key == cacher.BeforeSet
-	})
-	if findHook != -1 {
-		r.hooks[findHook].Fnc(key, val)
-	}
+	cacher.HandlerBeforeSet(r, key, val)
 
 	var value interface{}
 	valStr, err := json.Marshal(&val)
@@ -104,7 +87,7 @@ func (r *Redis[M]) Set(ctx context.Context, key string, val M, opts ...cacher.St
 	value = string(valStr)
 	// Handler
 	if r.CompressAlg != "" {
-		b, err := r.compress(val)
+		b, err := cacher.Compress(val, r.CompressAlg)
 		if err != nil {
 			return err
 		}
@@ -122,12 +105,7 @@ func (r *Redis[M]) Set(ctx context.Context, key string, val M, opts ...cacher.St
 		return err
 	}
 
-	findHook = slices.IndexFunc(r.hooks, func(h cacher.Hook) bool {
-		return h.Key == cacher.AfterSet
-	})
-	if findHook != -1 {
-		r.hooks[findHook].Fnc(key, val)
-	}
+	cacher.HandlerAfterSet(r, key, val)
 	return nil
 }
 
@@ -142,21 +120,11 @@ func (r *Redis[M]) MSet(ctx context.Context, data ...cacher.Params[M]) error {
 }
 
 func (r *Redis[M]) Delete(ctx context.Context, key string) error {
-	findHook := slices.IndexFunc(r.hooks, func(h cacher.Hook) bool {
-		return h.Key == cacher.BeforeDelete
-	})
-	if findHook != -1 {
-		r.hooks[findHook].Fnc(key, nil)
-	}
+	cacher.HandlerBeforeDelete(r, key)
 	// Handler
 	r.client.Del(ctx, key).Err()
 
-	findHook = slices.IndexFunc(r.hooks, func(h cacher.Hook) bool {
-		return h.Key == cacher.AfterDelete
-	})
-	if findHook != -1 {
-		r.hooks[findHook].Fnc(key, nil)
-	}
+	cacher.HandlerAfterDelete(r, key)
 	return nil
 }
 
@@ -164,64 +132,6 @@ func (r *Redis[M]) Clear(ctx context.Context) error {
 	// Handler
 	r.client.FlushDB(ctx).Err()
 	return nil
-}
-
-func (r *Redis[M]) compress(data M) ([]byte, error) {
-	input, err := cacher.ToBytes(data)
-	if err != nil {
-		return nil, err
-	}
-	switch r.CompressAlg {
-	case cacher.CompressAlgGzip:
-		return cacher.CompressGzip(input)
-	case cacher.CompressAlgFlate:
-		return cacher.CompressFlate(input)
-	case cacher.CompressAlgZlib:
-		return cacher.CompressZlib(input)
-	default:
-		return input, nil
-	}
-}
-
-func (r *Redis[M]) decompress(dataRaw interface{}) (M, error) {
-	dataByte, ok := dataRaw.([]byte)
-	if !ok {
-		return *new(M), errors.New("assert type failed")
-	}
-
-	var output []byte
-	var err error
-
-	switch r.CompressAlg {
-	case cacher.CompressAlgGzip:
-		output, err = cacher.DecompressGzip(dataByte)
-		if err != nil {
-			return *new(M), err
-		}
-	case cacher.CompressAlgFlate:
-		output, err = cacher.DecompressFlate(dataByte)
-		if err != nil {
-			return *new(M), err
-		}
-	case cacher.CompressAlgZlib:
-		output, err = cacher.DecompressZlib(dataByte)
-		if err != nil {
-			return *new(M), err
-		}
-	default:
-		return *new(M), nil
-	}
-
-	dataRaw, err = cacher.FromBytes[M](output)
-	if err != nil {
-		return *new(M), err
-	}
-
-	data, ok := dataRaw.(M)
-	if !ok {
-		return *new(M), errors.New("assert type failed")
-	}
-	return data, nil
 }
 
 func (r *Redis[M]) SetOptions(option cacher.StoreOptions) {
@@ -236,4 +146,8 @@ func (r *Redis[M]) SetOptions(option cacher.StoreOptions) {
 	if option.Hooks != nil {
 		r.hooks = option.Hooks
 	}
+}
+
+func (r *Redis[M]) GetHooks() []cacher.Hook {
+	return r.hooks
 }

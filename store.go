@@ -25,4 +25,5 @@ type Store[M any] interface {
 	MSet(ctx context.Context, data ...Params[M]) error
 	Delete(ctx context.Context, key string) error
 	Clear(ctx context.Context) error
+	GetHooks() []Hook
 }
