@@ -1,9 +1,9 @@
-module github.com/tinh-tinh/cacher/storage/sqlite3
+module github.com/tinh-tinh/cacher/storage/memcache
 
 go 1.22.2
 
 require (
-	github.com/mattn/go-sqlite3 v1.14.24
+	github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874
 	github.com/stretchr/testify v1.9.0
 	github.com/tinh-tinh/cacher v1.1.0
 	github.com/tinh-tinh/tinhtinh v1.4.0
