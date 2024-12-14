@@ -1,22 +1,33 @@
 package cacher_test
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/tinh-tinh/cacher"
+	"github.com/tinh-tinh/tinhtinh/common"
+	"github.com/tinh-tinh/tinhtinh/core"
 )
 
 func Test_Expire(t *testing.T) {
-	cache := cacher.New(cacher.Options[any]{
-		Ttl: 1 * time.Millisecond,
+	cache := cacher.NewInMemory[any](cacher.StoreOptions{
+		Ttl: 10 * time.Millisecond,
 	})
 
-	err := cache.Set("users", "John")
+	ctx := context.Background()
+	err := cache.Set(ctx, "users", "John")
 	require.Nil(t, err)
 
-	data, err := cache.Get("users")
+	time.Sleep(12 * time.Millisecond)
+
+	data, err := cache.Get(ctx, "users")
 	require.NotNil(t, err)
 	require.Nil(t, data)
 }
@@ -26,18 +37,19 @@ func Test_CompressGzip(t *testing.T) {
 		Name string
 		Age  string
 	}
-	cache := cacher.New(cacher.Options[Person]{
+	cache := cacher.NewInMemory[Person](cacher.StoreOptions{
 		CompressAlg: cacher.CompressAlgGzip,
 		Ttl:         15 * time.Minute,
 	})
 
-	err := cache.Set("users", Person{
+	ctx := context.Background()
+	err := cache.Set(ctx, "users", Person{
 		Name: "John",
 		Age:  "30",
 	})
 	require.Nil(t, err)
 
-	data, err := cache.Get("users")
+	data, err := cache.Get(ctx, "users")
 	require.Nil(t, err)
 
 	require.Equal(t, "John", data.Name)
@@ -49,18 +61,19 @@ func Test_CompressZlib(t *testing.T) {
 		Name string
 		Age  string
 	}
-	cache := cacher.New(cacher.Options[Person]{
+	cache := cacher.NewInMemory[Person](cacher.StoreOptions{
 		CompressAlg: cacher.CompressAlgZlib,
 		Ttl:         15 * time.Minute,
 	})
 
-	err := cache.Set("users", Person{
+	ctx := context.Background()
+	err := cache.Set(ctx, "users", Person{
 		Name: "John",
 		Age:  "30",
 	})
 	require.Nil(t, err)
 
-	data, err := cache.Get("users")
+	data, err := cache.Get(ctx, "users")
 	require.Nil(t, err)
 
 	require.Equal(t, "John", data.Name)
@@ -72,18 +85,19 @@ func Test_CompressFlate(t *testing.T) {
 		Name string
 		Age  string
 	}
-	cache := cacher.New(cacher.Options[Person]{
+	cache := cacher.NewInMemory[Person](cacher.StoreOptions{
 		CompressAlg: cacher.CompressAlgFlate,
 		Ttl:         15 * time.Minute,
 	})
 
-	err := cache.Set("users", Person{
+	ctx := context.Background()
+	err := cache.Set(ctx, "users", Person{
 		Name: "John",
 		Age:  "30",
 	})
 	require.Nil(t, err)
 
-	data, err := cache.Get("users")
+	data, err := cache.Get(ctx, "users")
 	require.Nil(t, err)
 
 	require.Equal(t, "John", data.Name)
@@ -91,27 +105,29 @@ func Test_CompressFlate(t *testing.T) {
 }
 
 func Test_Fail(t *testing.T) {
-	cache := cacher.New(cacher.Options[any]{
+	cache := cacher.NewInMemory[any](cacher.StoreOptions{
 		Ttl: 15 * time.Minute,
 	})
 
-	_, err := cache.Get("users")
+	ctx := context.Background()
+	_, err := cache.Get(ctx, "users")
 	require.NotNil(t, err)
 
-	cache2 := cacher.New(cacher.Options[string]{
+	cache2 := cacher.NewInMemory[string](cacher.StoreOptions{
 		Ttl:         15 * time.Minute,
 		CompressAlg: "abc",
 	})
-	require.Nil(t, cache2.Store)
+	require.Nil(t, cache2)
 }
 
 func Test_MGet(t *testing.T) {
-	cache := cacher.New(cacher.Options[string]{
+	cache := cacher.NewInMemory[string](cacher.StoreOptions{
 		Ttl: 15 * time.Minute,
 	})
 	require.NotNil(t, cache)
 
-	err := cache.MSet(cacher.Params[string]{
+	ctx := context.Background()
+	err := cache.MSet(ctx, cacher.Params[string]{
 		Key: "1",
 		Val: "John",
 	}, cacher.Params[string]{
@@ -120,24 +136,24 @@ func Test_MGet(t *testing.T) {
 	})
 	require.Nil(t, err)
 
-	data, err := cache.MGet("1", "2")
+	data, err := cache.MGet(ctx, "1", "2")
 	require.Nil(t, err)
 	require.Equal(t, "John", data[0])
 	require.Equal(t, "Jane", data[1])
 
-	cache2 := cacher.New(cacher.Options[string]{
+	cache2 := cacher.NewInMemory[string](cacher.StoreOptions{
 		Ttl: 15 * time.Minute,
 	})
 
-	_, err = cache2.MGet("1", "2")
+	_, err = cache2.MGet(ctx, "1", "2")
 	require.NotNil(t, err)
 
-	cache3 := cacher.New(cacher.Options[string]{
+	cache3 := cacher.NewInMemory[string](cacher.StoreOptions{
 		Ttl:         15 * time.Minute,
 		CompressAlg: cacher.CompressAlgZlib,
 	})
 
-	err = cache3.MSet(cacher.Params[string]{
+	err = cache3.MSet(ctx, cacher.Params[string]{
 		Key: "1",
 		Val: "John",
 		Options: cacher.StoreOptions{
@@ -149,8 +165,88 @@ func Test_MGet(t *testing.T) {
 	})
 	require.Nil(t, err)
 
-	data, err = cache3.MGet("1", "2")
+	data, err = cache3.MGet(ctx, "1", "2")
 	require.Nil(t, err)
 	require.Equal(t, "John", data[0])
 	require.Equal(t, "Jane", data[1])
+}
+
+func Test_Memory_Module(t *testing.T) {
+	userController := func(module *core.DynamicModule) *core.DynamicController {
+		cache := cacher.Inject[[]byte](module)
+		ctrl := module.NewController("users")
+
+		ctrl.Get("", func(ctx core.Ctx) error {
+			data, err := cache.Get("modules")
+			if err != nil {
+				fmt.Println(err)
+				return common.InternalServerException(ctx.Res(), err.Error())
+			}
+			return ctx.JSON(core.Map{
+				"data": string(data),
+			})
+		})
+
+		ctrl.Post("", func(ctx core.Ctx) error {
+			cache.Set("modules", []byte("John"))
+
+			return ctx.JSON(core.Map{
+				"data": "ok",
+			})
+		})
+
+		return ctrl
+	}
+
+	userModule := func(module *core.DynamicModule) *core.DynamicModule {
+		return module.New(core.NewModuleOptions{
+			Controllers: []core.Controller{
+				userController,
+			},
+		})
+	}
+
+	appModule := func() *core.DynamicModule {
+		cache := cacher.NewInMemory[[]byte](cacher.StoreOptions{
+			Ttl: 15 * time.Minute,
+		})
+
+		module := core.NewModule(core.NewModuleOptions{
+			Imports: []core.Module{
+				cacher.Register(cacher.Options[[]byte]{
+					Ttl:   15 * time.Minute,
+					Store: cache,
+				}),
+				userModule,
+			},
+		})
+
+		return module
+	}
+
+	app := core.CreateFactory(appModule)
+	app.SetGlobalPrefix("api")
+
+	testServer := httptest.NewServer(app.PrepareBeforeListen())
+	defer testServer.Close()
+
+	testClient := testServer.Client()
+	_, err := testClient.Post(testServer.URL+"/api/users", "application/json", nil)
+	require.Nil(t, err)
+
+	resp, err := testClient.Get(testServer.URL + "/api/users")
+	require.Nil(t, err)
+	require.Equal(t, http.StatusOK, resp.StatusCode)
+
+	data, err := io.ReadAll(resp.Body)
+	require.Nil(t, err)
+
+	type Response struct {
+		Data string `json:"data"`
+	}
+
+	var response Response
+	err = json.Unmarshal(data, &response)
+	require.Nil(t, err)
+	require.Equal(t, "John", response.Data)
 }
