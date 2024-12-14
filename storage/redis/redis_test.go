@@ -33,7 +33,7 @@ func Test_Expire(t *testing.T) {
 
 	time.Sleep(2 * time.Millisecond)
 	data, err := cache.Get(ctx, "expire")
-	require.NotNil(t, err)
+	require.Nil(t, err)
 	require.Nil(t, data)
 }
 
@@ -119,7 +119,7 @@ func Test_Clear(t *testing.T) {
 	require.Nil(t, err)
 
 	data, err := cache.MGet(ctx, "1", "2")
-	require.NotNil(t, err)
+	require.Nil(t, err)
 	require.Empty(t, data)
 }
 
@@ -209,7 +209,7 @@ func Test_Delete(t *testing.T) {
 	require.Nil(t, err)
 
 	data, err = cache.Get(ctx, "delete")
-	require.NotNil(t, err)
+	require.Nil(t, err)
 	require.Empty(t, data)
 }
 
@@ -273,7 +273,7 @@ func Test_Hook(t *testing.T) {
 	require.Nil(t, err)
 
 	data, err = cache.Get(ctx, "before")
-	require.NotNil(t, err)
+	require.Nil(t, err)
 	require.Empty(t, data)
 }
 

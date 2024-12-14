@@ -3,6 +3,7 @@ package redis
 import (
 	"context"
 	"encoding/json"
+	"reflect"
 	"time"
 
 	"github.com/tinh-tinh/cacher"
@@ -44,6 +45,9 @@ func (r *Redis[M]) Get(ctx context.Context, key string) (M, error) {
 	// Handler
 	val, err := r.client.Get(ctx, key).Result()
 	if err != nil {
+		if err == redis_store.Nil {
+			return *new(M), nil
+		}
 		return *new(M), err
 	}
 
@@ -71,7 +75,9 @@ func (r *Redis[M]) MGet(ctx context.Context, keys ...string) ([]M, error) {
 		if err != nil {
 			return nil, err
 		}
-		output = append(output, schema)
+		if !reflect.ValueOf(schema).IsZero() {
+			output = append(output, schema)
+		}
 	}
 	return output, nil
 }

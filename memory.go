@@ -62,7 +62,7 @@ func (m *Memory[M]) Set(ctx context.Context, key string, val M, opts ...StoreOpt
 	}
 	i := item{e: exp, v: val}
 	if m.CompressAlg != "" {
-		b, err := m.compress(val)
+		b, err := Compress(val, m.CompressAlg)
 		if err != nil {
 			return err
 		}
@@ -87,7 +87,7 @@ func (m *Memory[M]) MSet(ctx context.Context, data ...Params[M]) error {
 		}
 		i := item{e: exp, v: d.Val}
 		if m.CompressAlg != "" {
-			b, err := m.compress(d.Val)
+			b, err := Compress(d.Val, m.CompressAlg)
 			if err != nil {
 				return err
 			}
@@ -117,7 +117,7 @@ func (m *Memory[M]) Get(ctx context.Context, key string) (M, error) {
 	val, ok := v.v.(M)
 	if !ok {
 		if m.CompressAlg != "" {
-			return m.decompress(v.v)
+			return Decompress[M](v.v, m.CompressAlg)
 		}
 		return *new(M), errors.New("key not found")
 	}
@@ -149,7 +149,7 @@ func (m *Memory[M]) MGet(ctx context.Context, keys ...string) ([]M, error) {
 		val, ok := v.v.(M)
 		if !ok {
 			if m.CompressAlg != "" {
-				d, err := m.decompress(v.v)
+				d, err := Decompress[M](v.v, m.CompressAlg)
 				if err != nil {
 					continue
 				}
@@ -207,64 +207,6 @@ func (m *Memory[M]) gc(sleep time.Duration) {
 		}
 		m.Unlock()
 	}
-}
-
-func (m *Memory[M]) compress(data M) ([]byte, error) {
-	input, err := ToBytes(data)
-	if err != nil {
-		return nil, err
-	}
-	switch m.CompressAlg {
-	case "zlib":
-		return CompressZlib(input)
-	case "flate":
-		return CompressFlate(input)
-	case "gzip":
-		return CompressGzip(input)
-	default:
-		return input, nil
-	}
-}
-
-func (m *Memory[M]) decompress(dataRaw interface{}) (M, error) {
-	dataByte, ok := dataRaw.([]byte)
-	if !ok {
-		return *new(M), errors.New("assert type failed")
-	}
-
-	var output []byte
-	var err error
-
-	switch m.CompressAlg {
-	case "zlib":
-		output, err = DecompressZlib(dataByte)
-		if err != nil {
-			return *new(M), err
-		}
-	case "flate":
-		output, err = DecompressFlate(dataByte)
-		if err != nil {
-			return *new(M), err
-		}
-	case "gzip":
-		output, err = DecompressGzip(dataByte)
-		if err != nil {
-			return *new(M), err
-		}
-	default:
-		return *new(M), nil
-	}
-
-	dataRaw, err = FromBytes[M](output)
-	if err != nil {
-		return *new(M), err
-	}
-
-	data, ok := dataRaw.(M)
-	if !ok {
-		return *new(M), errors.New("assert type failed")
-	}
-	return data, nil
 }
 
 func (m *Memory[M]) GetHooks() []Hook {
