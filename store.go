@@ -26,4 +26,5 @@ type Store[M any] interface {
 	Delete(ctx context.Context, key string) error
 	Clear(ctx context.Context) error
 	GetHooks() []Hook
+	GetConnect() interface{}
 }
