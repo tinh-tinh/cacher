@@ -270,3 +270,7 @@ func (m *Memory[M]) decompress(dataRaw interface{}) (M, error) {
 func (m *Memory[M]) GetHooks() []Hook {
 	return m.hooks
 }
+
+func (m *Memory[M]) GetConnect() interface{} {
+	return nil
+}

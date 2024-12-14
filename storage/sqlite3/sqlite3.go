@@ -54,12 +54,6 @@ func New[M any](opt Options) cacher.Store[M] {
 	return sqlite
 }
 
-type Item[M any] struct {
-	Key string
-	Val M
-	Exp uint32
-}
-
 func (s *Sqlite[M]) SetOptions(option cacher.StoreOptions) {
 	if option.CompressAlg != "" && cacher.IsValidAlg(option.CompressAlg) {
 		s.CompressAlg = option.CompressAlg
@@ -183,4 +177,8 @@ func (s *Sqlite[M]) gc(sleep time.Duration) {
 	for range ticker.C {
 		s.db.Exec("DELETE FROM cache WHERE expires_at < DATETIME('now')")
 	}
+}
+
+func (s *Sqlite[M]) GetConnect() interface{} {
+	return s.db
 }

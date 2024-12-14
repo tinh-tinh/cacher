@@ -151,3 +151,7 @@ func (r *Redis[M]) SetOptions(option cacher.StoreOptions) {
 func (r *Redis[M]) GetHooks() []cacher.Hook {
 	return r.hooks
 }
+
+func (r *Redis[M]) GetConnect() interface{} {
+	return r.client
+}
