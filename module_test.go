@@ -8,13 +8,13 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tinh-tinh/cacher"
-	"github.com/tinh-tinh/tinhtinh/common"
-	"github.com/tinh-tinh/tinhtinh/core"
+	"github.com/tinh-tinh/cacher/v2"
+	"github.com/tinh-tinh/tinhtinh/v2/common"
+	"github.com/tinh-tinh/tinhtinh/v2/core"
 )
 
 func Test_Module(t *testing.T) {
-	userController := func(module *core.DynamicModule) *core.DynamicController {
+	userController := func(module core.Module) core.Controller {
 		cache := cacher.Inject[[]byte](module)
 		ctrl := module.NewController("users")
 
@@ -39,17 +39,17 @@ func Test_Module(t *testing.T) {
 		return ctrl
 	}
 
-	userModule := func(module *core.DynamicModule) *core.DynamicModule {
+	userModule := func(module core.Module) core.Module {
 		return module.New(core.NewModuleOptions{
-			Controllers: []core.Controller{
+			Controllers: []core.Controllers{
 				userController,
 			},
 		})
 	}
 
-	appModule := func() *core.DynamicModule {
+	appModule := func() core.Module {
 		module := core.NewModule(core.NewModuleOptions{
-			Imports: []core.Module{
+			Imports: []core.Modules{
 				cacher.Register(cacher.Options[[]byte]{
 					Ttl: 15 * time.Minute,
 				}),

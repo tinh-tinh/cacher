@@ -1,10 +1,10 @@
-module github.com/tinh-tinh/cacher
+module github.com/tinh-tinh/cacher/v2
 
 go 1.22.2
 
 require (
 	github.com/stretchr/testify v1.9.0
-	github.com/tinh-tinh/tinhtinh v1.4.0
+	github.com/tinh-tinh/tinhtinh/v2 v2.0.0
 )
 
 require (
