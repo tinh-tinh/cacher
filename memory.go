@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tinh-tinh/tinhtinh/common/era"
+	"github.com/tinh-tinh/tinhtinh/v2/common/era"
 )
 
 func NewInMemory[M any](opt StoreOptions) Store[M] {

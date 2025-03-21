@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tinh-tinh/cacher"
+	"github.com/tinh-tinh/cacher/v2"
 )
 
 func Test_Bytes(t *testing.T) {

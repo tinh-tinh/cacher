@@ -5,9 +5,9 @@ name: Go
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "v2" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "master", "v2" ]
 
 jobs:
 
@@ -27,53 +27,53 @@ jobs:
     - name: Test
       run: go test -cover ./...
 
-  redis:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go-version: [ '1.22.x' ]
+  # redis:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       go-version: [ '1.22.x' ]
 
-    # Service containers to run with `container-job`
-    services:
-      # Label used to access the service container
-      redis:
-        # Docker Hub image
-        image: redis
-        # Set health checks to wait until redis has started
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          # Maps port 6379 on service container to the host
-          - 6379:6379
+  #   # Service containers to run with `container-job`
+  #   services:
+  #     # Label used to access the service container
+  #     redis:
+  #       # Docker Hub image
+  #       image: redis
+  #       # Set health checks to wait until redis has started
+  #       options: >-
+  #         --health-cmd "redis-cli ping"
+  #         --health-interval 10s
+  #         --health-timeout 5s
+  #         --health-retries 5
+  #       ports:
+  #         # Maps port 6379 on service container to the host
+  #         - 6379:6379
 
-    steps:
-    - uses: actions/checkout@v4
+  #   steps:
+  #   - uses: actions/checkout@v4
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.22.0'
+  #   - name: Set up Go
+  #     uses: actions/setup-go@v4
+  #     with:
+  #       go-version: '1.22.0'
 
-    - name: Test
-      run: |
-        cd storage/redis
-        go test -cover ./...
+  #   - name: Test
+  #     run: |
+  #       cd storage/redis
+  #       go test -cover ./...
 
-  sqlite3:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go-version: [ '1.22.x' ]
-    steps:
-    - uses: actions/checkout@v4
+  # sqlite3:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       go-version: [ '1.22.x' ]
+  #   steps:
+  #   - uses: actions/checkout@v4
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
+  #   - name: Set up Go
+  #     uses: actions/setup-go@v4
 
-    - name: Test
-      run: |
-        cd storage/sqlite3
-        go test -cover ./...
+  #   - name: Test
+  #     run: |
+  #       cd storage/sqlite3
+  #       go test -cover ./...

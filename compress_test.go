@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tinh-tinh/cacher"
+	"github.com/tinh-tinh/cacher/v2"
 )
 
 type BigStruct struct {
