@@ -3,11 +3,13 @@ package cacher
 import (
 	"context"
 	"time"
+
+	"github.com/tinh-tinh/tinhtinh/v2/common/compress"
 )
 
 type StoreOptions struct {
 	Ttl         time.Duration
-	CompressAlg CompressAlg
+	CompressAlg compress.Alg
 	Hooks       []Hook
 }
 

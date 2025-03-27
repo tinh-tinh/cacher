@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tinh-tinh/cacher/v2"
 	"github.com/tinh-tinh/tinhtinh/v2/common"
+	"github.com/tinh-tinh/tinhtinh/v2/common/compress"
 	"github.com/tinh-tinh/tinhtinh/v2/core"
 )
 
@@ -38,7 +39,7 @@ func Test_CompressGzip(t *testing.T) {
 		Age  string
 	}
 	cache := cacher.NewInMemory[Person](cacher.StoreOptions{
-		CompressAlg: cacher.CompressAlgGzip,
+		CompressAlg: compress.Gzip,
 		Ttl:         15 * time.Minute,
 	})
 
@@ -62,7 +63,7 @@ func Test_CompressZlib(t *testing.T) {
 		Age  string
 	}
 	cache := cacher.NewInMemory[Person](cacher.StoreOptions{
-		CompressAlg: cacher.CompressAlgZlib,
+		CompressAlg: compress.Zlib,
 		Ttl:         15 * time.Minute,
 	})
 
@@ -86,7 +87,7 @@ func Test_CompressFlate(t *testing.T) {
 		Age  string
 	}
 	cache := cacher.NewInMemory[Person](cacher.StoreOptions{
-		CompressAlg: cacher.CompressAlgFlate,
+		CompressAlg: compress.Flate,
 		Ttl:         15 * time.Minute,
 	})
 
@@ -150,7 +151,7 @@ func Test_MGet(t *testing.T) {
 
 	cache3 := cacher.NewInMemory[string](cacher.StoreOptions{
 		Ttl:         15 * time.Minute,
-		CompressAlg: cacher.CompressAlgZlib,
+		CompressAlg: compress.Zlib,
 	})
 
 	err = cache3.MSet(ctx, cacher.Params[string]{

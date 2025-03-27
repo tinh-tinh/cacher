@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/tinh-tinh/tinhtinh/v2/common/compress"
 	"github.com/tinh-tinh/tinhtinh/v2/common/era"
 )
 
@@ -33,7 +34,7 @@ type Memory[M any] struct {
 	sync.RWMutex
 	ttl         time.Duration
 	data        map[string]item
-	CompressAlg CompressAlg
+	CompressAlg compress.Alg
 	hooks       []Hook
 }
 
@@ -62,7 +63,7 @@ func (m *Memory[M]) Set(ctx context.Context, key string, val M, opts ...StoreOpt
 	}
 	i := item{e: exp, v: val}
 	if m.CompressAlg != "" {
-		b, err := Compress(val, m.CompressAlg)
+		b, err := compress.Encode(val, m.CompressAlg)
 		if err != nil {
 			return err
 		}
@@ -87,7 +88,7 @@ func (m *Memory[M]) MSet(ctx context.Context, data ...Params[M]) error {
 		}
 		i := item{e: exp, v: d.Val}
 		if m.CompressAlg != "" {
-			b, err := Compress(d.Val, m.CompressAlg)
+			b, err := compress.Encode(d.Val, m.CompressAlg)
 			if err != nil {
 				return err
 			}
@@ -117,7 +118,11 @@ func (m *Memory[M]) Get(ctx context.Context, key string) (M, error) {
 	val, ok := v.v.(M)
 	if !ok {
 		if m.CompressAlg != "" {
-			return Decompress[M](v.v, m.CompressAlg)
+			valByte, ok := v.v.([]byte)
+			if !ok {
+				return *new(M), errors.New("value save is not supported compress")
+			}
+			return compress.DecodeMarshall[M](valByte, m.CompressAlg)
 		}
 		return *new(M), errors.New("key not found")
 	}
@@ -149,7 +154,11 @@ func (m *Memory[M]) MGet(ctx context.Context, keys ...string) ([]M, error) {
 		val, ok := v.v.(M)
 		if !ok {
 			if m.CompressAlg != "" {
-				d, err := Decompress[M](v.v, m.CompressAlg)
+				valByte, ok := v.v.([]byte)
+				if !ok {
+					continue
+				}
+				d, err := compress.DecodeMarshall[M](valByte, m.CompressAlg)
 				if err != nil {
 					continue
 				}
@@ -215,4 +224,8 @@ func (m *Memory[M]) GetHooks() []Hook {
 
 func (m *Memory[M]) GetConnect() interface{} {
 	return nil
+}
+
+func IsValidAlg(val compress.Alg) bool {
+	return val == compress.Gzip || val == compress.Flate || val == compress.Zlib
 }
