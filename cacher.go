@@ -3,18 +3,20 @@ package cacher
 import (
 	"context"
 	"time"
+
+	"github.com/tinh-tinh/tinhtinh/v2/common/compress"
 )
 
 type Cacher[M any] struct {
 	Store       Store[M]
 	ctx         context.Context
-	CompressAlg CompressAlg
+	CompressAlg compress.Alg
 }
 
 type Options[M any] struct {
 	Store       Store[M]
 	Ttl         time.Duration
-	CompressAlg CompressAlg
+	CompressAlg compress.Alg
 	Hooks       []Hook
 }
 
