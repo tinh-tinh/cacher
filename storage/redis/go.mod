@@ -2,8 +2,10 @@ module github.com/tinh-tinh/cacher/storage/redis
 
 go 1.22.2
 
+toolchain go1.24.1
+
 require (
-	github.com/redis/go-redis/v9 v9.7.0
+	github.com/redis/go-redis/v9 v9.7.3
 	github.com/stretchr/testify v1.9.0
 	github.com/tinh-tinh/cacher v1.1.0
 	github.com/tinh-tinh/tinhtinh v1.4.0
