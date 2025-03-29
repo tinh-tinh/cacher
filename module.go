@@ -20,8 +20,8 @@ func Register[M any](options ...Options[M]) core.Modules {
 	}
 }
 
-func Inject[M any](module core.Module) *Cacher[M] {
-	cache, ok := module.Ref(CACHE_MANAGER).(*Cacher[M])
+func Inject[M any](ref core.RefProvider) *Cacher[M] {
+	cache, ok := ref.Ref(CACHE_MANAGER).(*Cacher[M])
 	if !ok {
 		return nil
 	}
