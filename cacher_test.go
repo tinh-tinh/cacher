@@ -10,8 +10,10 @@ import (
 )
 
 func TestCacher(t *testing.T) {
-	cache := cacher.New(cacher.Options[string]{
-		Ttl: 15 * time.Minute,
+	cache := cacher.NewSchema[string](cacher.Config{
+		Store: cacher.NewInMemory(cacher.StoreOptions{
+			Ttl: 15 * time.Minute,
+		}),
 	})
 	require.NotNil(t, cache)
 
@@ -36,31 +38,25 @@ func TestCacher(t *testing.T) {
 	require.Nil(t, err)
 	require.Equal(t, "John", data)
 
-	err = cache.Clear()
-	require.Nil(t, err)
-
-	data, err = cache.Get("users")
-	require.NotNil(t, err)
-	require.Empty(t, data)
-}
-
-func TestDataTypes(t *testing.T) {
-	cache := cacher.New(cacher.Options[string]{
-		Ttl: 15 * time.Minute,
+	err = cache.MSet(cacher.Params[string]{
+		Key:   "snow",
+		Value: "white",
+	}, cacher.Params[string]{
+		Key:   "momam",
+		Value: "black",
 	})
-	require.NotNil(t, cache)
-
-	cache.Set("users", "John")
-
-	data, err := cache.Get("users")
 	require.Nil(t, err)
-	require.Equal(t, "John", data)
+
+	list, err := cache.MGet("snow", "momam")
+	require.Nil(t, err)
+	require.Len(t, list, 2)
 }
 
 func Test_Context(t *testing.T) {
-	cache := cacher.New(cacher.Options[string]{
-		Ttl: 15 * time.Minute,
-	})
+	cache := cacher.NewSchema[string](cacher.Config{
+		Store: cacher.NewInMemory(cacher.StoreOptions{
+			Ttl: 15 * time.Minute,
+		})})
 	require.NotNil(t, cache)
 
 	cache.SetCtx(context.TODO())
