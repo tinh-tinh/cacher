@@ -28,7 +28,13 @@ jobs:
         go-version: '1.22.0'
 
     - name: Test
-      run: go test -cover ./...
+      run: go test -cover ./... -coverprofile=coverage.txt
+
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        slug: tinh-tinh/cacher
 
   # redis:
   #   runs-on: ubuntu-latest
