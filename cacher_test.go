@@ -56,11 +56,35 @@ func Test_Context(t *testing.T) {
 	cache := cacher.NewSchema[string](cacher.Config{
 		Store: cacher.NewInMemory(cacher.StoreOptions{
 			Ttl: 15 * time.Minute,
-		})})
+		}),
+	})
 	require.NotNil(t, cache)
 
 	cache.SetCtx(context.TODO())
 
 	ctx := cache.GetCtx()
 	require.NotNil(t, ctx)
+}
+
+func Test_Namespace(t *testing.T) {
+	store := cacher.NewInMemory(cacher.StoreOptions{
+		Ttl: 15 * time.Minute,
+	})
+	cache1 := cacher.NewSchema[string](cacher.Config{
+		Store:     store,
+		Namespace: "cache1",
+	})
+	cache1.Set("1", "abc")
+	data, err := cache1.Get("1")
+	require.Nil(t, err)
+	require.Equal(t, "abc", data)
+
+	cache2 := cacher.NewSchema[string](cacher.Config{
+		Store:     store,
+		Namespace: "cache2",
+	})
+	cache2.Set("1", "mno")
+	data2, err := cache1.Get("1")
+	require.Nil(t, err)
+	require.Equal(t, "abc", data2)
 }

@@ -22,6 +22,7 @@ type Config struct {
 	Store       Store
 	CompressAlg compress.Alg
 	Hooks       []Hook
+	Namespace   string
 }
 
 func NewSchema[M any](config Config) *Schema[M] {
@@ -46,7 +47,7 @@ func (s *Schema[M]) GetHooks() []Hook {
 func (s *Schema[M]) Get(key string) (M, error) {
 	HandlerBeforeGet(*s, key)
 
-	val, err := s.Store.Get(s.ctx, key)
+	val, err := s.Store.Get(s.ctx, s.generateKey(key))
 	if err != nil {
 		return *new(M), err
 	}
@@ -93,7 +94,7 @@ func (s *Schema[M]) Set(key string, data M, opts ...StoreOptions) (err error) {
 		}
 	}
 
-	err = s.Store.Set(s.ctx, key, value, opts...)
+	err = s.Store.Set(s.ctx, s.generateKey(key), value, opts...)
 	if err != nil {
 		return err
 	}
@@ -115,11 +116,18 @@ func (s *Schema[M]) MSet(params ...Params[M]) error {
 func (s *Schema[M]) Delete(key string) error {
 	HandlerBeforeDelete(*s, key)
 
-	err := s.Store.Delete(s.ctx, key)
+	err := s.Store.Delete(s.ctx, s.generateKey(key))
 	if err != nil {
 		return err
 	}
 
 	HandlerAfterDelete(*s, key)
 	return nil
+}
+
+func (s *Schema[M]) generateKey(key string) string {
+	if s.Namespace != "" {
+		return s.Namespace + ":" + key
+	}
+	return key
 }
