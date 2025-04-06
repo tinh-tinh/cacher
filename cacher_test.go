@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/tinh-tinh/cacher/v2"
+	"github.com/tinh-tinh/tinhtinh/v2/common/compress"
 )
 
 func TestCacher(t *testing.T) {
@@ -87,4 +88,38 @@ func Test_Namespace(t *testing.T) {
 	data2, err := cache1.Get("1")
 	require.Nil(t, err)
 	require.Equal(t, "abc", data2)
+}
+
+func Test_InvalidSchema(t *testing.T) {
+	store := cacher.NewInMemory(cacher.StoreOptions{
+		Ttl: 15 * time.Minute,
+	})
+	cacheStr := cacher.NewSchema[string](cacher.Config{
+		Store: store,
+	})
+	err := cacheStr.Set("1", "abc")
+	require.Nil(t, err)
+
+	cacheNum := cacher.NewSchema[int](cacher.Config{
+		Store: store,
+	})
+	_, err = cacheNum.Get("1")
+	require.NotNil(t, err)
+
+	_, err = cacheNum.MGet("1")
+	require.NotNil(t, err)
+
+	cacheAny := cacher.NewSchema[any](cacher.Config{
+		Store: store,
+	})
+	c := make(chan int)
+	err = cacheAny.Set("1", c)
+	require.NotNil(t, err)
+
+	cacheCompressAny := cacher.NewSchema[any](cacher.Config{
+		Store:       store,
+		CompressAlg: compress.Gzip,
+	})
+	err = cacheCompressAny.Set("1", nil)
+	require.NotNil(t, err)
 }
