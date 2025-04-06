@@ -10,8 +10,10 @@ import (
 )
 
 func Test_Hook(t *testing.T) {
-	cache := cacher.New(cacher.Options[string]{
-		Ttl: 15 * time.Minute,
+	cache := cacher.NewSchema[string](cacher.Config{
+		Store: cacher.NewInMemory(cacher.StoreOptions{
+			Ttl: 15 * time.Minute,
+		}),
 		Hooks: []cacher.Hook{
 			{Key: cacher.BeforeSet, Fnc: func(key string, val any) {
 				fmt.Println("BeforeSet", key, val)

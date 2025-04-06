@@ -6,24 +6,23 @@ import (
 
 const CACHE_MANAGER core.Provide = "cache_manager"
 
-func Register[M any](options ...Options[M]) core.Modules {
+func Register(config Config) core.Modules {
 	return func(module core.Module) core.Module {
 		cacheModule := module.New(core.NewModuleOptions{})
 
-		cacheManager := New(options[0])
 		cacheModule.NewProvider(core.ProviderOptions{
 			Name:  CACHE_MANAGER,
-			Value: cacheManager,
+			Value: &config,
 		})
 		cacheModule.Export(CACHE_MANAGER)
 		return cacheModule
 	}
 }
 
-func Inject[M any](ref core.RefProvider) *Cacher[M] {
-	cache, ok := ref.Ref(CACHE_MANAGER).(*Cacher[M])
+func Inject[M any](ref core.RefProvider) *Schema[M] {
+	cache, ok := ref.Ref(CACHE_MANAGER).(*Config)
 	if !ok {
 		return nil
 	}
-	return cache
+	return NewSchema[M](*cache)
 }

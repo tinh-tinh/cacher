@@ -16,7 +16,7 @@ import (
 
 func Test_Module(t *testing.T) {
 	userController := func(module core.Module) core.Controller {
-		cache := cacher.Inject[[]byte](module)
+		cache := cacher.Inject[string](module)
 		ctrl := module.NewController("users")
 
 		ctrl.Get("", func(ctx core.Ctx) error {
@@ -25,12 +25,12 @@ func Test_Module(t *testing.T) {
 				return common.InternalServerException(ctx.Res(), err.Error())
 			}
 			return ctx.JSON(core.Map{
-				"data": string(data),
+				"data": data,
 			})
 		})
 
 		ctrl.Post("", func(ctx core.Ctx) error {
-			cache.Set("users", []byte("John"))
+			cache.Set("users", "John")
 
 			return ctx.JSON(core.Map{
 				"data": "ok",
@@ -51,8 +51,10 @@ func Test_Module(t *testing.T) {
 	appModule := func() core.Module {
 		module := core.NewModule(core.NewModuleOptions{
 			Imports: []core.Modules{
-				cacher.Register(cacher.Options[[]byte]{
-					Ttl: 15 * time.Minute,
+				cacher.Register(cacher.Config{
+					Store: cacher.NewInMemory(cacher.StoreOptions{
+						Ttl: 15 * time.Minute,
+					}),
 				}),
 				userModule,
 			},
@@ -139,8 +141,10 @@ func Test_Module_Compress(t *testing.T) {
 	appModule := func() core.Module {
 		module := core.NewModule(core.NewModuleOptions{
 			Imports: []core.Modules{
-				cacher.Register(cacher.Options[User]{
-					Ttl:         15 * time.Minute,
+				cacher.Register(cacher.Config{
+					Store: cacher.NewInMemory(cacher.StoreOptions{
+						Ttl: 15 * time.Minute,
+					}),
 					CompressAlg: compress.Gzip,
 				}),
 				userModule,

@@ -20,8 +20,8 @@ type Hook struct {
 	Fnc HookFnc
 }
 
-func HandlerBeforeGet[M any](store Store[M], key string) {
-	hooks := store.GetHooks()
+func HandlerBeforeGet[M any](schema Schema[M], key string) {
+	hooks := schema.GetHooks()
 	findHook := slices.IndexFunc(hooks, func(h Hook) bool {
 		return h.Key == BeforeGet
 	})
@@ -30,8 +30,8 @@ func HandlerBeforeGet[M any](store Store[M], key string) {
 	}
 }
 
-func HandlerAfterGet[M any](store Store[M], key string, data M) {
-	hooks := store.GetHooks()
+func HandlerAfterGet[M any](schema Schema[M], key string, data M) {
+	hooks := schema.GetHooks()
 	findHook := slices.IndexFunc(hooks, func(h Hook) bool {
 		return h.Key == AfterGet
 	})
@@ -40,8 +40,8 @@ func HandlerAfterGet[M any](store Store[M], key string, data M) {
 	}
 }
 
-func HandlerBeforeSet[M any](store Store[M], key string, data M) {
-	hooks := store.GetHooks()
+func HandlerBeforeSet[M any](schema Schema[M], key string, data M) {
+	hooks := schema.GetHooks()
 	findHook := slices.IndexFunc(hooks, func(h Hook) bool {
 		return h.Key == BeforeSet
 	})
@@ -50,8 +50,8 @@ func HandlerBeforeSet[M any](store Store[M], key string, data M) {
 	}
 }
 
-func HandlerAfterSet[M any](store Store[M], key string, data M) {
-	hooks := store.GetHooks()
+func HandlerAfterSet[M any](schema Schema[M], key string, data M) {
+	hooks := schema.GetHooks()
 	findHook := slices.IndexFunc(hooks, func(h Hook) bool {
 		return h.Key == AfterSet
 	})
@@ -60,8 +60,8 @@ func HandlerAfterSet[M any](store Store[M], key string, data M) {
 	}
 }
 
-func HandlerBeforeDelete[M any](store Store[M], key string) {
-	hooks := store.GetHooks()
+func HandlerBeforeDelete[M any](schema Schema[M], key string) {
+	hooks := schema.GetHooks()
 	findHook := slices.IndexFunc(hooks, func(h Hook) bool {
 		return h.Key == BeforeDelete
 	})
@@ -70,8 +70,8 @@ func HandlerBeforeDelete[M any](store Store[M], key string) {
 	}
 }
 
-func HandlerAfterDelete[M any](store Store[M], key string) {
-	hooks := store.GetHooks()
+func HandlerAfterDelete[M any](schema Schema[M], key string) {
+	hooks := schema.GetHooks()
 	findHook := slices.IndexFunc(hooks, func(h Hook) bool {
 		return h.Key == AfterDelete
 	})
