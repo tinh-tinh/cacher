@@ -21,8 +21,12 @@ github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsT
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/tinh-tinh/cacher v1.1.0 h1:ecl9MRQtiO5oPArurnEWDQpgu0uYszpC4PdG6rjaDxQ=
 github.com/tinh-tinh/cacher v1.1.0/go.mod h1:BOMos2A3KQSdl70dEWeJ2I5m66xEzxK5r/t/Rsvolws=
+github.com/tinh-tinh/cacher/v2 v2.2.0 h1:TFr2KX33UE/Npmulob/35AbRWLZFgeIBmGFrAY5SIe8=
+github.com/tinh-tinh/cacher/v2 v2.2.0/go.mod h1:EcpLA7lnCLaOGBEX0bXL3cuzwLilhdZ/oysWAxEPcgc=
 github.com/tinh-tinh/tinhtinh v1.4.0 h1:Z+nx5gpKJ5o2EWZuB8DFRh+PYwFgIwUeA+SaliYyK7c=
 github.com/tinh-tinh/tinhtinh v1.4.0/go.mod h1:Ml1twSfPhVCckxSVPfZxiyLfPs2AM3aQqp4qlGoubrk=
+github.com/tinh-tinh/tinhtinh/v2 v2.0.2 h1:54czOqe0wTPqe2HjqAFuuG380A3sYs2I16YwVxTu0Zs=
+github.com/tinh-tinh/tinhtinh/v2 v2.0.2/go.mod h1:4nppE7KAIswZKutI9ElMqAD9kyash7aea0Ewowsqj5g=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 h1:YR8cESwS4TdDjEe65xsg0ogRM/Nc3DYOhEAlW+xobZo=
 gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
