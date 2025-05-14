@@ -19,6 +19,22 @@ func Register(config Config) core.Modules {
 	}
 }
 
+type ConfigFactory func(module core.RefProvider) Config
+
+func RegisterFactory(factory ConfigFactory) core.Modules {
+	return func(module core.Module) core.Module {
+		cacheModule := module.New(core.NewModuleOptions{})
+
+		config := factory(module)
+		cacheModule.NewProvider(core.ProviderOptions{
+			Name:  CACHE_MANAGER,
+			Value: &config,
+		})
+		cacheModule.Export(CACHE_MANAGER)
+		return cacheModule
+	}
+}
+
 func Inject[M any](ref core.RefProvider) *Schema[M] {
 	cache, ok := ref.Ref(CACHE_MANAGER).(*Config)
 	if !ok {
