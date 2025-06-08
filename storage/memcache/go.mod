@@ -5,8 +5,8 @@ go 1.22.2
 require (
 	github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874
 	github.com/stretchr/testify v1.9.0
-	github.com/tinh-tinh/cacher v1.1.0
-	github.com/tinh-tinh/tinhtinh v1.4.0
+	github.com/tinh-tinh/cacher/v2 v2.2.0
+	github.com/tinh-tinh/tinhtinh/v2 v2.1.3
 )
 
 require (
@@ -16,4 +16,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-// replace github.com/tinh-tinh/cacher => ../../
+replace github.com/tinh-tinh/cacher => ../../
