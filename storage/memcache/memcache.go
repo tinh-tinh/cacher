@@ -9,12 +9,11 @@ import (
 )
 
 type Options struct {
-	Addr  []string
-	Ttl   time.Duration
-	Hooks []cacher.Hook
+	Addr []string
+	Ttl  time.Duration
 }
 
-func New[M any](opt Options) cacher.Store {
+func New(opt Options) cacher.Store {
 	client := memcache_store.New(opt.Addr...)
 	return &Memcache{
 		client: client,

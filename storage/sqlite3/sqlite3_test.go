@@ -11,14 +11,14 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tinh-tinh/cacher"
 	"github.com/tinh-tinh/cacher/storage/sqlite3"
-	"github.com/tinh-tinh/tinhtinh/common"
-	"github.com/tinh-tinh/tinhtinh/core"
+	"github.com/tinh-tinh/cacher/v2"
+	"github.com/tinh-tinh/tinhtinh/v2/common"
+	"github.com/tinh-tinh/tinhtinh/v2/core"
 )
 
 func Test_Sqlite3(t *testing.T) {
-	sqlite := sqlite3.New[any](sqlite3.Options{
+	sqlite := sqlite3.New(sqlite3.Options{
 		Addr: "test.db",
 		Ttl:  2 * time.Second,
 	})
@@ -27,7 +27,7 @@ func Test_Sqlite3(t *testing.T) {
 	ctx := context.Background()
 	sqlite.Clear(ctx)
 
-	err := sqlite.Set(ctx, "test", "John")
+	err := sqlite.Set(ctx, "expire", []byte("John"))
 	require.Nil(t, err)
 
 	data, err := sqlite.Get(ctx, "test")
@@ -47,109 +47,41 @@ func Test_GetSet(t *testing.T) {
 		Age  int
 	}
 
-	cache := sqlite3.New[Person](sqlite3.Options{
+	cache := sqlite3.New(sqlite3.Options{
 		Addr: "test.db",
 		Ttl:  15 * time.Minute,
 	})
 
 	ctx := context.Background()
 
-	err := cache.Set(ctx, "users", Person{
+	person, err := json.Marshal(Person{
 		Name: "John",
 		Age:  30,
 	})
 	require.Nil(t, err)
+	err = cache.Set(ctx, "users", person)
+	require.Nil(t, err)
 
-	data, err := cache.Get(ctx, "users")
+	raw, err := cache.Get(ctx, "users")
+	require.Nil(t, err)
+
+	var data Person
+	err = json.Unmarshal(raw, &data)
 	require.Nil(t, err)
 
 	require.Equal(t, "John", data.Name)
 	require.Equal(t, 30, data.Age)
 }
 
-func Test_MGetSet(t *testing.T) {
-	cache := sqlite3.New[string](sqlite3.Options{
-		Addr: "test.db",
-		Ttl:  15 * time.Minute,
-	})
-
-	ctx := context.Background()
-
-	err := cache.MSet(ctx, cacher.Params[string]{
-		Key: "11",
-		Val: "John",
-	}, cacher.Params[string]{
-		Key: "12",
-		Val: "Jane",
-	})
-	require.Nil(t, err)
-
-	data, err := cache.MGet(ctx, "11", "12")
-	require.Nil(t, err)
-	require.Equal(t, "John", data[0])
-	require.Equal(t, "Jane", data[1])
-}
-
-func Test_CompressGzip(t *testing.T) {
-	cache := sqlite3.New[string](sqlite3.Options{
-		Addr:        "test.db",
-		Ttl:         15 * time.Minute,
-		CompressAlg: cacher.CompressAlgGzip,
-	})
-
-	ctx := context.Background()
-
-	err := cache.Set(ctx, "gzip", "John")
-	require.Nil(t, err)
-
-	data, err := cache.Get(ctx, "gzip")
-	require.Nil(t, err)
-	require.Equal(t, "John", data)
-}
-
-func Test_CompressZlib(t *testing.T) {
-	cache := sqlite3.New[string](sqlite3.Options{
-		Addr:        "test.db",
-		Ttl:         15 * time.Minute,
-		CompressAlg: cacher.CompressAlgZlib,
-	})
-
-	ctx := context.Background()
-
-	err := cache.Set(ctx, "zlib", "John")
-	require.Nil(t, err)
-
-	data, err := cache.Get(ctx, "zlib")
-	require.Nil(t, err)
-	require.Equal(t, "John", data)
-}
-
-func Test_CompressFlate(t *testing.T) {
-	cache := sqlite3.New[string](sqlite3.Options{
-		Addr:        "test.db",
-		Ttl:         15 * time.Minute,
-		CompressAlg: cacher.CompressAlgFlate,
-	})
-
-	ctx := context.Background()
-
-	err := cache.Set(ctx, "flate", "John")
-	require.Nil(t, err)
-
-	data, err := cache.Get(ctx, "flate")
-	require.Nil(t, err)
-	require.Equal(t, "John", data)
-}
-
 func Test_Delete(t *testing.T) {
-	cache := sqlite3.New[string](sqlite3.Options{
+	cache := sqlite3.New(sqlite3.Options{
 		Addr: "test.db",
 		Ttl:  15 * time.Minute,
 	})
 
 	ctx := context.Background()
 
-	err := cache.Set(ctx, "abc", "John")
+	err := cache.Set(ctx, "delete", []byte("John"))
 	require.Nil(t, err)
 
 	data, err := cache.Get(ctx, "abc")
@@ -164,54 +96,8 @@ func Test_Delete(t *testing.T) {
 	require.Empty(t, data)
 }
 
-func Test_Hook(t *testing.T) {
-	cache := sqlite3.New[string](sqlite3.Options{
-		Addr: "test.db",
-		Ttl:  15 * time.Minute,
-		Hooks: []cacher.Hook{
-			{Key: cacher.BeforeSet, Fnc: func(key string, val any) {
-				fmt.Println("BeforeSet", key, val)
-			}},
-			{Key: cacher.AfterSet, Fnc: func(key string, val any) {
-				fmt.Println("AfterSet", key, val)
-			}},
-			{Key: cacher.BeforeGet, Fnc: func(key string, val any) {
-				fmt.Println("BeforeGet", key)
-			}},
-			{Key: cacher.AfterGet, Fnc: func(key string, val any) {
-				fmt.Println("AfterGet", key, val)
-			}},
-			{Key: cacher.BeforeDelete, Fnc: func(key string, val any) {
-				fmt.Println("BeforeDelete", key)
-			}},
-			{Key: cacher.AfterDelete, Fnc: func(key string, val any) {
-				fmt.Println("AfterDelete", key)
-			}},
-		},
-	})
-
-	ctx := context.Background()
-
-	err := cache.Set(ctx, "before", "John")
-	require.Nil(t, err)
-
-	err = cache.Set(ctx, "after", "Jane")
-	require.Nil(t, err)
-
-	data, err := cache.Get(ctx, "before")
-	require.Nil(t, err)
-	require.Equal(t, "John", data)
-
-	err = cache.Delete(ctx, "before")
-	require.Nil(t, err)
-
-	data, err = cache.Get(ctx, "before")
-	require.Nil(t, err)
-	require.Empty(t, data)
-}
-
 func Test_Module(t *testing.T) {
-	userController := func(module *core.DynamicModule) *core.DynamicController {
+	userController := func(module core.Module) core.Controller {
 		cache := cacher.Inject[[]byte](module)
 		ctrl := module.NewController("users")
 
@@ -237,24 +123,23 @@ func Test_Module(t *testing.T) {
 		return ctrl
 	}
 
-	userModule := func(module *core.DynamicModule) *core.DynamicModule {
+	userModule := func(module core.Module) core.Module {
 		return module.New(core.NewModuleOptions{
-			Controllers: []core.Controller{
+			Controllers: []core.Controllers{
 				userController,
 			},
 		})
 	}
 
-	appModule := func() *core.DynamicModule {
-		cache := sqlite3.New[[]byte](sqlite3.Options{
+	appModule := func() core.Module {
+		cache := sqlite3.New(sqlite3.Options{
 			Addr: "test.db",
 			Ttl:  15 * time.Minute,
 		})
 
 		module := core.NewModule(core.NewModuleOptions{
-			Imports: []core.Module{
-				cacher.Register(cacher.Options[[]byte]{
-					Ttl:   15 * time.Minute,
+			Imports: []core.Modules{
+				cacher.Register(cacher.Config{
 					Store: cache,
 				}),
 				userModule,
