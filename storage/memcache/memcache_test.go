@@ -16,7 +16,7 @@ import (
 )
 
 func Test_Expire(t *testing.T) {
-	cache := memcache.New[any](memcache.Options{
+	cache := memcache.New(memcache.Options{
 		Addr: []string{"localhost:11211"},
 		Ttl:  1 * time.Second,
 	})
@@ -37,7 +37,7 @@ func Test_GetSet(t *testing.T) {
 		Age  int
 	}
 
-	cache := memcache.New[Person](memcache.Options{
+	cache := memcache.New(memcache.Options{
 		Addr: []string{"localhost:11211"},
 		Ttl:  15 * time.Minute,
 	})
@@ -64,7 +64,7 @@ func Test_GetSet(t *testing.T) {
 }
 
 func Test_Clear(t *testing.T) {
-	cache := memcache.New[string](memcache.Options{
+	cache := memcache.New(memcache.Options{
 		Addr: []string{"localhost:11211"},
 		Ttl:  15 * time.Minute,
 	})
@@ -83,7 +83,7 @@ func Test_Clear(t *testing.T) {
 }
 
 func Test_Delete(t *testing.T) {
-	cache := memcache.New[string](memcache.Options{
+	cache := memcache.New(memcache.Options{
 		Addr: []string{"localhost:11211"},
 		Ttl:  15 * time.Minute,
 	})
@@ -140,7 +140,7 @@ func Test_Module(t *testing.T) {
 	}
 
 	appModule := func() core.Module {
-		cache := memcache.New[[]byte](memcache.Options{
+		cache := memcache.New(memcache.Options{
 			Addr: []string{"localhost:11211"},
 			Ttl:  1 * time.Millisecond,
 		})
