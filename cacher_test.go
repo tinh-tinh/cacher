@@ -75,7 +75,8 @@ func Test_Namespace(t *testing.T) {
 		Store:     store,
 		Namespace: "cache1",
 	})
-	cache1.Set("1", "abc")
+	err := cache1.Set("1", "abc")
+	require.Nil(t, err)
 	data, err := cache1.Get("1")
 	require.Nil(t, err)
 	require.Equal(t, "abc", data)
@@ -84,7 +85,8 @@ func Test_Namespace(t *testing.T) {
 		Store:     store,
 		Namespace: "cache2",
 	})
-	cache2.Set("1", "mno")
+	err = cache2.Set("1", "mno")
+	require.Nil(t, err)
 	data2, err := cache1.Get("1")
 	require.Nil(t, err)
 	require.Equal(t, "abc", data2)
