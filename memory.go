@@ -30,6 +30,10 @@ type Memory struct {
 	data map[string]item
 }
 
+func (m *Memory) Name() string {
+	return MEMORY
+}
+
 func (m *Memory) Set(ctx context.Context, key string, val []byte, opts ...StoreOptions) error {
 	// Handler
 	var exp uint32

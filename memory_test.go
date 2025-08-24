@@ -50,7 +50,8 @@ func Test_Clear(t *testing.T) {
 	err := cache.Set(ctx, "users", []byte("John"))
 	require.Nil(t, err)
 
-	cache.Clear(ctx)
+	err = cache.Clear(ctx)
+	require.Nil(t, err)
 
 	data, err := cache.Get(ctx, "users")
 	require.NotNil(t, err)

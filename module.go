@@ -35,10 +35,35 @@ func RegisterFactory(factory ConfigFactory) core.Modules {
 	}
 }
 
-func Inject[M any](ref core.RefProvider) *Schema[M] {
-	cache, ok := ref.Ref(CACHE_MANAGER).(*Config)
-	if !ok {
-		return nil
+func RegisterMulti(configs ...Config) core.Modules {
+	return func(module core.Module) core.Module {
+		cacheModule := module.New(core.NewModuleOptions{})
+
+		for _, config := range configs {
+			cacheModule.NewProvider(core.ProviderOptions{
+				Name:  core.Provide(config.Store.Name()),
+				Value: &config,
+			})
+			cacheModule.Export(core.Provide(config.Store.Name()))
+		}
+		return cacheModule
 	}
-	return NewSchema[M](*cache)
+}
+
+type MultiConfigFactory func(module core.RefProvider) []Config
+
+func RegisterMultiFactory(factory MultiConfigFactory) core.Modules {
+	return func(module core.Module) core.Module {
+		cacheModule := module.New(core.NewModuleOptions{})
+
+		configs := factory(module)
+		for _, config := range configs {
+			cacheModule.NewProvider(core.ProviderOptions{
+				Name:  core.Provide(config.Store.Name()),
+				Value: &config,
+			})
+			cacheModule.Export(core.Provide(config.Store.Name()))
+		}
+		return cacheModule
+	}
 }
