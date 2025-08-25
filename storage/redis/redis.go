@@ -27,6 +27,10 @@ type Redis struct {
 	ttl    time.Duration
 }
 
+func (r *Redis) Name() string {
+	return cacher.REDIS
+}
+
 func (r *Redis) Get(ctx context.Context, key string) ([]byte, error) {
 	val, err := r.client.Get(ctx, key).Bytes()
 	if err != nil {
