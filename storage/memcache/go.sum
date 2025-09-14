@@ -1,5 +1,7 @@
 github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874 h1:N7oVaKyGp8bttX0bfZGmcGkjz7DLQXhAn3DNd3T0ous=
 github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874/go.mod h1:r5xuitiExdLAJ09PR7vBVENGvp4ZuTBeWTGtxuX3K+c=
+github.com/bradfitz/gomemcache v0.0.0-20250403215159-8d39553ac7cf h1:TqhNAT4zKbTdLa62d2HDBFdvgSbIGB3eJE8HqhgiL9I=
+github.com/bradfitz/gomemcache v0.0.0-20250403215159-8d39553ac7cf/go.mod h1:r5xuitiExdLAJ09PR7vBVENGvp4ZuTBeWTGtxuX3K+c=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -13,8 +15,12 @@ github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsT
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/tinh-tinh/cacher/v2 v2.2.0 h1:TFr2KX33UE/Npmulob/35AbRWLZFgeIBmGFrAY5SIe8=
 github.com/tinh-tinh/cacher/v2 v2.2.0/go.mod h1:EcpLA7lnCLaOGBEX0bXL3cuzwLilhdZ/oysWAxEPcgc=
+github.com/tinh-tinh/cacher/v2 v2.4.0 h1:f9vez0YipMHLj1H2FJNZghR08wmAJujWLI8TDmayWHc=
+github.com/tinh-tinh/cacher/v2 v2.4.0/go.mod h1:KpFWMwHigKQfvZ+cJ62iQRNsxse3w6SezJ7rQIJVZdI=
 github.com/tinh-tinh/tinhtinh/v2 v2.1.3 h1:ug+9XFhKH/Z6jY5TqV5ioWq2kOhO/9q1+jG7wGjHp2s=
 github.com/tinh-tinh/tinhtinh/v2 v2.1.3/go.mod h1:4nppE7KAIswZKutI9ElMqAD9kyash7aea0Ewowsqj5g=
+github.com/tinh-tinh/tinhtinh/v2 v2.3.3 h1:vKkpSTs6sY+2nCENo8isA2rQdIFT0ajjR0aAs83J2hk=
+github.com/tinh-tinh/tinhtinh/v2 v2.3.3/go.mod h1:4nppE7KAIswZKutI9ElMqAD9kyash7aea0Ewowsqj5g=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 h1:YR8cESwS4TdDjEe65xsg0ogRM/Nc3DYOhEAlW+xobZo=
 gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
