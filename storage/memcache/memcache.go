@@ -26,6 +26,10 @@ type Memcache struct {
 	ttl    time.Duration
 }
 
+func (m *Memcache) Name() string {
+	return cacher.MEMCACHE
+}
+
 func (m *Memcache) SetOptions(opt cacher.StoreOptions) {
 	m.ttl = opt.Ttl
 }

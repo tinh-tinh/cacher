@@ -3,10 +3,10 @@ module github.com/tinh-tinh/cacher/storage/memcache
 go 1.22.2
 
 require (
-	github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874
+	github.com/bradfitz/gomemcache v0.0.0-20250403215159-8d39553ac7cf
 	github.com/stretchr/testify v1.9.0
-	github.com/tinh-tinh/cacher/v2 v2.2.0
-	github.com/tinh-tinh/tinhtinh/v2 v2.1.3
+	github.com/tinh-tinh/cacher/v2 v2.4.0
+	github.com/tinh-tinh/tinhtinh/v2 v2.3.3
 )
 
 require (

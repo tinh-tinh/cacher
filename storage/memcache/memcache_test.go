@@ -107,7 +107,7 @@ func Test_Delete(t *testing.T) {
 
 func Test_Module(t *testing.T) {
 	userController := func(module core.Module) core.Controller {
-		cache := cacher.Inject[[]byte](module)
+		cache := cacher.InjectSchema[[]byte](module)
 		ctrl := module.NewController("users")
 
 		ctrl.Get("", func(ctx core.Ctx) error {
