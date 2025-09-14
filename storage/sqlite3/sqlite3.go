@@ -53,6 +53,10 @@ func (s *Sqlite) SetOptions(option cacher.StoreOptions) {
 	}
 }
 
+func (s *Sqlite) Name() string {
+	return cacher.SQLITE3
+}
+
 func (s *Sqlite) Set(ctx context.Context, key string, val []byte, opts ...cacher.StoreOptions) error {
 	var ttl time.Duration
 	if len(opts) > 0 {
