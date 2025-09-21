@@ -5,10 +5,10 @@ go 1.22.2
 toolchain go1.24.1
 
 require (
-	github.com/redis/go-redis/v9 v9.12.1
+	github.com/redis/go-redis/v9 v9.14.0
 	github.com/stretchr/testify v1.9.0
 	github.com/tinh-tinh/cacher/v2 v2.4.0
-	github.com/tinh-tinh/tinhtinh/v2 v2.3.1
+	github.com/tinh-tinh/tinhtinh/v2 v2.3.3
 )
 
 require (
@@ -20,4 +20,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/tinh-tinh/cacher => ../../
+replace github.com/tinh-tinh/cacher/v2 => ../../
