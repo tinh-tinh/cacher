@@ -216,3 +216,17 @@ func Test_Module(t *testing.T) {
 	require.Nil(t, err)
 	require.Equal(t, "John", response.Data)
 }
+
+func Test_GetClient(t *testing.T) {
+	cache := redis.New(redis.Options{
+		Connect: &redis_store.Options{
+			Addr:     "localhost:6379",
+			DB:       0,
+			Password: "",
+		},
+		Ttl: 1 * time.Millisecond,
+	})
+	cacheRedis, ok := cache.(*redis.Redis)
+	require.True(t, ok)
+	require.NotNil(t, cacheRedis.GetClient())
+}

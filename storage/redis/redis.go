@@ -73,3 +73,7 @@ func (r *Redis) Clear(ctx context.Context) error {
 	r.client.FlushDB(ctx).Err()
 	return nil
 }
+
+func (r *Redis) GetClient() *redis_store.Client {
+	return r.client
+}
