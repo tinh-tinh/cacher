@@ -170,3 +170,14 @@ func Test_Module(t *testing.T) {
 	require.Nil(t, err)
 	require.Equal(t, "John", response.Data)
 }
+
+func Test_GetClient(t *testing.T) {
+	cache := pebble.New(pebble.Options{
+		Path:    "demo",
+		Sync:    false,
+		Connect: &pebble_store.Options{},
+	})
+	cacheRedis, ok := cache.(*pebble.Pebble)
+	require.True(t, ok)
+	require.NotNil(t, cacheRedis.GetClient())
+}
