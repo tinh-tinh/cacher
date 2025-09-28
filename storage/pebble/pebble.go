@@ -86,3 +86,7 @@ func (s *Pebble) Clear(ctx context.Context) error {
 	}
 	return nil
 }
+
+func (r *Pebble) GetClient() *pebble_store.DB {
+	return r.client
+}
