@@ -6,7 +6,8 @@ import (
 )
 
 type StoreOptions struct {
-	Ttl time.Duration
+	Ttl      time.Duration
+	MaxItems int
 }
 
 type Store interface {
