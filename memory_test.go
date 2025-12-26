@@ -57,3 +57,39 @@ func Test_Clear(t *testing.T) {
 	require.NotNil(t, err)
 	require.Nil(t, data)
 }
+
+func TestMaxItem(t *testing.T) {
+	cache := cacher.NewInMemory(cacher.StoreOptions{
+		Ttl:      15 * time.Minute,
+		MaxItems: 2,
+	})
+
+	ctx := context.Background()
+	err := cache.Set(ctx, "1", []byte("data1"))
+	require.Nil(t, err)
+
+	err = cache.Set(ctx, "2", []byte("data2"))
+	require.Nil(t, err)
+
+	err = cache.Set(ctx, "3", []byte("data3"))
+	require.Nil(t, err)
+
+	data, err := cache.Get(ctx, "1")
+	require.NotNil(t, err)
+	require.Nil(t, data)
+
+	data, err = cache.Get(ctx, "2")
+	require.Nil(t, err)
+	require.Equal(t, []byte("data2"), data)
+
+	data, err = cache.Get(ctx, "3")
+	require.Nil(t, err)
+	require.Equal(t, []byte("data3"), data)
+
+	err = cache.Set(ctx, "3", []byte("data1"))
+	require.Nil(t, err)
+
+	data, err = cache.Get(ctx, "3")
+	require.Nil(t, err)
+	require.Equal(t, []byte("data1"), data)
+}

@@ -9,10 +9,17 @@ import (
 	"github.com/tinh-tinh/tinhtinh/v2/common/era"
 )
 
+var ErrKeyNotFound = errors.New("key not found")
+
 func NewInMemory(opt StoreOptions) Store {
+	if opt.MaxItems <= 0 {
+		opt.MaxItems = 1000
+	}
 	memory := &Memory{
-		ttl:  opt.Ttl,
-		data: make(map[string]item),
+		ttl:      opt.Ttl,
+		maxItems: opt.MaxItems,
+		data:     make(map[string]item, opt.MaxItems),
+		keys:     make([]string, 0, opt.MaxItems),
 	}
 	era.StartTimeStampUpdater()
 	go memory.gc(1 * time.Second)
@@ -26,8 +33,10 @@ type item struct {
 
 type Memory struct {
 	sync.RWMutex
-	ttl  time.Duration
-	data map[string]item
+	ttl      time.Duration
+	data     map[string]item
+	maxItems int
+	keys     []string
 }
 
 func (m *Memory) Name() string {
@@ -42,11 +51,24 @@ func (m *Memory) Set(ctx context.Context, key string, val []byte, opts ...StoreO
 	} else {
 		exp = uint32(m.ttl.Seconds()) + era.Timestamp()
 	}
-	i := item{e: exp, v: val}
-	m.Lock()
-	m.data[key] = i
-	m.Unlock()
 
+	m.Lock()
+	defer m.Unlock()
+
+	i := item{e: exp, v: val}
+	if _, exists := m.data[key]; exists {
+		m.data[key] = i
+		return nil
+	}
+
+	if m.maxItems > 0 && len(m.data) >= m.maxItems {
+		// evict an item
+		evictKey := m.keys[0]
+		delete(m.data, evictKey)
+		m.keys = m.keys[1:]
+	}
+	m.data[key] = i
+	m.keys = append(m.keys, key)
 	return nil
 }
 
@@ -57,7 +79,7 @@ func (m *Memory) Get(ctx context.Context, key string) ([]byte, error) {
 	m.RUnlock()
 
 	if !ok || v.e != 0 && v.e <= era.Timestamp() {
-		return nil, errors.New("key not found")
+		return nil, ErrKeyNotFound
 	}
 	val, ok := v.v.([]byte)
 	if !ok {
